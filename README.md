@@ -9,3 +9,6 @@ vcs -full64 -v smic13g.v -v SP013D3_V1p2.v control_test.v control_pad.v -debug_a
 
 版图设计后仿（在output目录下执行）：
 vcs -full64 -v smic13g.v -v SP013D3_V1p2.v control_test.v control_pad_final.v  -debug_access -timescale=1ns/1ns -o simv +define+FSDB -R
+
+verdi查看波形：
+verdi -ssf control.fsdb &
