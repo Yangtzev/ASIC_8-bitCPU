@@ -1,0 +1,110 @@
+{
+    "control_test": [
+        "control_test",
+        "DcJDU",
+        "module",
+        1
+    ],
+    "control_pad": [
+        "control_pad",
+        "yTzYK",
+        "module",
+        2
+    ],
+    "INVXL": [
+        "INVXL",
+        "FsUsG",
+        "module",
+        3
+    ],
+    "AND2XL": [
+        "AND2XL",
+        "NGf3K",
+        "module",
+        4
+    ],
+    "AOI2BB1XL": [
+        "AOI2BB1XL",
+        "uZF5n",
+        "module",
+        21
+    ],
+    "NAND3XL": [
+        "NAND3XL",
+        "zJkFY",
+        "module",
+        9
+    ],
+    "NAND4XL": [
+        "NAND4XL",
+        "RaaAR",
+        "module",
+        22
+    ],
+    "NAND2BXL": [
+        "NAND2BXL",
+        "B7bZD",
+        "module",
+        23
+    ],
+    "NOR2XL": [
+        "NOR2XL",
+        "UiF6Q",
+        "module",
+        10
+    ],
+    "NOR3XL": [
+        "NOR3XL",
+        "qsiak",
+        "module",
+        11
+    ],
+    "NOR3BXL": [
+        "NOR3BXL",
+        "yEYNK",
+        "module",
+        24
+    ],
+    "OAI21XL": [
+        "OAI21XL",
+        "nqk2t",
+        "module",
+        13
+    ],
+    "OAI211XL": [
+        "OAI211XL",
+        "i85VS",
+        "module",
+        14
+    ],
+    "DFFRXL": [
+        "DFFRXL",
+        "D0Gi6",
+        "module",
+        16
+    ],
+    "PI": [
+        "PI",
+        "UE1nb",
+        "module",
+        17
+    ],
+    "PO8": [
+        "PO8",
+        "mDYvU",
+        "module",
+        18
+    ],
+    "...MASTER...": [
+        "SIM",
+        "amcQw",
+        "module",
+        19
+    ],
+    "udp_dff": [
+        "udp_dff",
+        "exIG1",
+        "udp",
+        20
+    ]
+}

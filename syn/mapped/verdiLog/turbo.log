@@ -1,0 +1,4 @@
+Command Line: /home/eda/synopsys/verdi/T-2022.06/platform/LINUXAMD64/bin/Novas -ssf control.fsdb
+uname(Linux eda 3.10.0-1160.108.1.el7.x86_64 #1 SMP Thu Jan 25 16:17:31 UTC 2024 x86_64)
+Disabled AskUser2 Message (Response 0): Close all windows and exit verdi?
+au time 166.628668 6.108607 1.700837 delta 275099648 275099648 total 800247808 800247808

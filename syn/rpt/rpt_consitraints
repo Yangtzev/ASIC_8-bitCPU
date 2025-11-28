@@ -1,0 +1,75 @@
+Information: Updating design information... (UID-85)
+ 
+****************************************
+Report : constraint
+        -all_violators
+Design : control_pad
+Version: R-2020.09-SP4
+Date   : Fri Nov 28 18:13:34 2025
+****************************************
+
+
+   max_transition
+
+                             Required        Actual
+   Net                      Transition     Transition        Slack
+   -----------------------------------------------------------------
+   opcode[0] (dont_touch)       1.02          14.61         -13.59  (VIOLATED)
+       PORT :  opcode[0]        1.02          14.61         -13.59  (VIOLATED)
+   opcode[1] (dont_touch)       1.02          14.61         -13.59  (VIOLATED)
+       PORT :  opcode[1]        1.02          14.61         -13.59  (VIOLATED)
+   opcode[2] (dont_touch)       1.02          14.61         -13.59  (VIOLATED)
+       PORT :  opcode[2]        1.02          14.61         -13.59  (VIOLATED)
+   rst_                         1.02          14.61         -13.59  (VIOLATED)
+       PORT :  rst_             1.02          14.61         -13.59  (VIOLATED)
+   zero                         1.02          14.61         -13.59  (VIOLATED)
+       PORT :  zero             1.02          14.61         -13.59  (VIOLATED)
+   ld_ac_pad (dont_touch)       1.02           2.39          -1.37  (VIOLATED)
+       PIN :   U26/Y            1.02           2.39          -1.37  (VIOLATED)
+   halt_pad (dont_touch)        1.02           2.39          -1.37  (VIOLATED)
+       PIN :   U23/Y            1.02           2.39          -1.37  (VIOLATED)
+   wr_pad (dont_touch)          1.02           2.38          -1.36  (VIOLATED)
+       PIN :   U27/Y            1.02           2.38          -1.36  (VIOLATED)
+   rd_pad (dont_touch)          1.02           2.06          -1.04  (VIOLATED)
+       PIN :   U16/Y            1.02           2.06          -1.04  (VIOLATED)
+   inc_pc_pad (dont_touch)      1.02           2.06          -1.04  (VIOLATED)
+       PIN :   U22/Y            1.02           2.06          -1.04  (VIOLATED)
+   data_e_pad (dont_touch)      1.02           2.02          -1.00  (VIOLATED)
+       PIN :   U25/Y            1.02           2.02          -1.00  (VIOLATED)
+   ld_pc_pad (dont_touch)       1.02           1.32          -0.30  (VIOLATED)
+       PIN :   U19/Y            1.02           1.32          -0.30  (VIOLATED)
+
+   -----------------------------------------------------------------
+   Total                      12                -75.44  
+
+   max_capacitance
+
+                             Required        Actual
+   Net                      Capacitance    Capacitance       Slack
+   -----------------------------------------------------------------
+   opcode[0] (dont_touch)       0.34           6.71          -6.37  (VIOLATED)
+   opcode[1] (dont_touch)       0.34           6.71          -6.37  (VIOLATED)
+   opcode[2] (dont_touch)       0.34           6.71          -6.37  (VIOLATED)
+   rst_                         0.34           6.71          -6.37  (VIOLATED)
+   zero                         0.34           6.71          -6.37  (VIOLATED)
+   data_e_pad (dont_touch)      0.04           0.08          -0.03  (VIOLATED)
+   halt_pad (dont_touch)        0.04           0.08          -0.03  (VIOLATED)
+   inc_pc_pad (dont_touch)      0.04           0.08          -0.03  (VIOLATED)
+   ld_ac_pad (dont_touch)       0.04           0.08          -0.03  (VIOLATED)
+   ld_pc_pad (dont_touch)       0.04           0.08          -0.03  (VIOLATED)
+   rd_pad (dont_touch)          0.04           0.08          -0.03  (VIOLATED)
+   wr_pad (dont_touch)          0.04           0.08          -0.03  (VIOLATED)
+
+   -----------------------------------------------------------------
+   Total                      12                -32.08  
+
+   max_leakage_power
+
+                             Required        Actual
+   Design                   Leakage Power  Leakage Power     Slack
+   -----------------------------------------------------------------
+   control_pad                  0.00       305936.72      -305936.72
+                                                                    (VIOLATED)
+
+
+1

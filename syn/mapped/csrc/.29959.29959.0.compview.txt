@@ -1,0 +1,9 @@
+{"vcs1":{"timestamp_begin":1762946634.090276324, "rt":1.56, "ut":0.18, "st":0.11}}
+{"vcselab":{"timestamp_begin":1762946635.698768297, "rt":0.22, "ut":0.16, "st":0.03}}
+{"link":{"timestamp_begin":1762946635.953634995, "rt":0.25, "ut":0.15, "st":0.08}}
+{"SNPS_VCS_INTERNAL_ROOT_START_TIME": 1762946633.757325953}
+{"VCS_COMP_START_TIME": 1762946633.757325953}
+{"VCS_COMP_END_TIME": 1762946636.282677746}
+{"VCS_USER_OPTIONS": "-full64 -v smic13g.v -v SP013D3_V1p2.v control_test.v control_pad.v -debug_access -timescale=1ns/1ps -o simv +define+FSDB"}
+{"vcs1": {"peak_mem": 348512}}
+{"stitch_vcselab": {"peak_mem": 221676}}

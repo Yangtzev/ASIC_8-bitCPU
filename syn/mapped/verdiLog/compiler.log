@@ -1,0 +1,8 @@
+*design* DebussyLib (btIdent Verdi_T-2022.06)
+Command arguments:
+    +define+verilog
+    control.fsdb
+
+*Error* no source file
+
+Total	1 error(s),   0 warning(s)
