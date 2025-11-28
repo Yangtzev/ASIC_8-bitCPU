@@ -1,0 +1,48 @@
+ 
+****************************************
+Report : constraint
+        -all_violators
+        -max_delay
+        -min_delay
+        -max_capacitance
+        -max_transition
+Design : control_pad
+Version: T-2022.03
+Date   : Fri Nov 28 20:06:27 2025
+****************************************
+
+
+   max_transition
+
+                             Required        Actual
+   Net                      Transition     Transition        Slack
+   -----------------------------------------------------------------
+   rst_                        1.020         14.783        -13.763  (VIOLATED)
+       PORT :  rst_            1.020         14.783        -13.763  (VIOLATED)
+   opcode[1]                   1.020         14.766        -13.746  (VIOLATED)
+       PORT :  opcode[1]       1.020         14.766        -13.746  (VIOLATED)
+   opcode[0]                   1.020         14.757        -13.737  (VIOLATED)
+       PORT :  opcode[0]       1.020         14.757        -13.737  (VIOLATED)
+   opcode[2]                   1.020         14.645        -13.625  (VIOLATED)
+       PORT :  opcode[2]       1.020         14.645        -13.625  (VIOLATED)
+   zero                        1.020         14.633        -13.613  (VIOLATED)
+       PORT :  zero            1.020         14.633        -13.613  (VIOLATED)
+
+   -----------------------------------------------------------------
+   Total                      5                -68.485  
+
+   max_capacitance
+
+                             Required        Actual
+   Net                      Capacitance    Capacitance       Slack
+   -----------------------------------------------------------------
+   rst_                        0.341          6.788         -6.447  (VIOLATED)
+   opcode[1]                   0.341          6.780         -6.439  (VIOLATED)
+   opcode[0]                   0.341          6.776         -6.435  (VIOLATED)
+   opcode[2]                   0.341          6.725         -6.383  (VIOLATED)
+   zero                        0.341          6.719         -6.378  (VIOLATED)
+
+   -----------------------------------------------------------------
+   Total                      5                -32.081  
+
+1

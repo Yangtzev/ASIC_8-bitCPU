@@ -1,0 +1,7 @@
+Input file: /home/user123/Desktop/ASIC/icc/run/snapshot/placed.tim.max.rpt
+Filters: -wns ,0 -zero_path ,0 -fanout 40 -transition_degradation 2.0 -slew_degradation 2.0 -logic_levels 50
+And Columns: none
+Sort Column: wns (ascending)
+Number of Paths: 1
+ Path Group           Start Point          End Point            WNS        Zero Path Worst Incremental Largest Fanout # Logic Levels Slew Degradation Transition Degradation
+ clk                  opcode[1]            ld_ac                8.4070     18.7000   0.8710            3              5              1.2497           2.9005*               

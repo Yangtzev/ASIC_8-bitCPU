@@ -1,0 +1,355 @@
+Start CPD check: ::check_tlu_plus_files 
+
+Sanity check for TLU+ vs MW-Tech files:
+ max_tlu+: /home/eda/lib/smic/SmicSPM4PR8R_starRCXT013_mixrf_p1mtx_1233_V1/SmicSPM4PR8R_starRCXT013_mixrf_p1mtx_1233_V1.6/ITF/TM9k_MIM1f/TLUPLUS/SmicSPM4PR8R_starRCXT013_log_mixRF_p1mt8_cell_max_1233_9k_1f.tluplus
+ min_tlu+: **NONE**
+ mapping_file: /home/eda/lib/smic/SmicSPM4PR8R_starRCXT013_mixrf_p1mtx_1233_V1/SmicSPM4PR8R_starRCXT013_mixrf_p1mtx_1233_V1.6/mapping/TM9k_MIM1f/SmicSPM4PR8R_013_log_mixRF_p1mt8_cell_max_1233_9k_1f.map
+ max_emul_tlu+: **NONE**
+ min_emul_tlu+: **NONE**
+ MW design lib: control_pad.mw
+
+--------- Sanity Check on TLUPlus Files -------------
+1. Checking the conducting layer names in ITF and mapping file ... 
+[ Passed! ]
+2. Checking the via layer names in ITF and mapping file ... 
+[ Passed! ]
+3. Checking the consistency of Min Width and Min Spacing between MW-tech and ITF ... 
+Warning: minSpacing value of layer "METAL1" (metal1) does not match : ITF (0.170) vs MW-tech (0.180). (TLUP-005)
+Warning: minSpacing value of layer "METAL8" (metal8) does not match : ITF (0.420) vs MW-tech (0.460). (TLUP-005)
+Warning: minWidth value of layer "METAL8" (metal8) does not match : ITF (0.420) vs MW-tech (0.440). (TLUP-004)
+----------------- Check Ends ------------------
+1
+End CPD check: ::check_tlu_plus_files
+Start CPD check: ::get_placement_area 
+227.000 227.000 377.420 374.600
+End CPD check: ::get_placement_area
+Start CPD check: report_routing_metal_info 
+Ignored layers in congestion analysis and RC estimation: METAL1 METAL2 METAL7 METAL8 
+
+Min_routing_layer: METAL3
+Max_routing_layer: METAL6
+Information: Report design vs library layers and preferred routing directions. (PNR-164)
+ 
+****************************************
+Report : Layers
+Design : control_pad
+Version: T-2022.03
+Date   : Fri Nov 28 20:07:02 2025
+****************************************
+
+Layer Name                   Library             Design              Tool understands
+METAL1                       Horizontal          Horizontal          Horizontal
+METAL2                       Vertical            Vertical            Vertical
+METAL3                       Horizontal          Horizontal          Horizontal
+METAL4                       Vertical            Vertical            Vertical
+METAL5                       Horizontal          Horizontal          Horizontal
+METAL6                       Vertical            Vertical            Vertical
+METAL7                       Horizontal          Horizontal          Horizontal
+METAL8                       Vertical            Vertical            Vertical
+
+Information: Report track info.  (PNR-165)
+****************************************
+Report track
+Design : control_pad
+Version: T-2022.03
+Date   : Fri Nov 28 20:07:02 2025
+****************************************
+Layer          Direction     Start         Tracks    Pitch          Attr
+------------------------------------------------------------------------
+Attributes :
+         usr : User defined
+         def : DEF defined
+
+METAL1             Y         0.475          1466      0.410           
+METAL2             Y         0.475          1466      0.410           
+METAL2             X         0.450          1313      0.460           
+METAL1             X         0.450          1313      0.460           
+METAL3             X         0.450          1313      0.460           
+METAL3             Y         0.475          1466      0.410           
+METAL2             Y         0.475          1466      0.410           
+METAL4             Y         0.475          1466      0.410           
+METAL4             X         0.450          1313      0.460           
+METAL3             X         0.450          1313      0.460           
+METAL5             X         0.450          1313      0.460           
+METAL5             Y         0.475          1466      0.410           
+METAL4             Y         0.475          1466      0.410           
+METAL6             Y         0.475          1466      0.410           
+METAL6             X         0.450          1313      0.460           
+METAL5             X         0.450          1313      0.460           
+METAL7             X         0.450          1313      0.460           
+METAL7             Y         0.475          1466      0.410           
+METAL6             Y         0.475          1466      0.410           
+METAL8             Y         0.475          1466      0.410           
+METAL8             X         0.670          629       0.960           
+METAL7             X         0.670          629       0.960           
+1
+End CPD check: report_routing_metal_info
+Start CPD check: check_track_and_unit 
+
+End CPD check: check_track_and_unit
+Start CPD check: check_layer_direction 
+
+End CPD check: check_layer_direction
+Start CPD check: check_physical_only_ports 
+Warning: No port objects matched '*' (SEL-004)
+[]
+End CPD check: check_physical_only_ports
+Start CPD check: ::check_database 
+************************************************************
+CHECK_DATABASE RESULTS FOR CELL : cts.CEL
+************************************************************
+MWUHIER: Checking for hierarchical internal netlist and flat internal netlist consistency ... 
+MWUHIER: Done with checking hierarchical internal netlist and flat internal netlist consistency. 
+Information: MWUHIER: Number of errors = 0 (MW-348)
+End PG consistent checking.. PG_Pass
+Information: Performing CEL netlist consistency check. (MWDC-118)
+Information: CEL consistency check PASSED. (MWDC-119)
+
+Start UPF checking.
+No UPF infomation. Finish UPF checking.
+1
+End CPD check: ::check_database
+Start CPD check: report_taint -dump_errors 
+
+****************************************
+  Report : Suggestions
+  Design : control_pad
+  Version: T-2022.03
+  Date   : Fri Nov 28 20:07:02 2025
+****************************************
+
+Information: No suggestion for current design. (PSYN-1068)
+
+1
+End CPD check: report_taint -dump_errors
+Start CPD check: check_for_HFN_ideal 
+
+End CPD check: check_for_HFN_ideal
+Start CPD check: check_for_dont_touch_net_with_drc_violation 
+Information: Using 4 cores for timing computations. (TIM-270)
+Warning: The trip points for the library named SP013D3_V1p2_typ differ from those in the library named typical_1v2c25. (TIM-164)
+Information: Updating design information... (UID-85)
+
+End CPD check: check_for_dont_touch_net_with_drc_violation
+Start CPD check: check_block_abstraction -stage pre_clock_opt 
+Information: No blocks with abstraction information found
+1
+End CPD check: check_block_abstraction -stage pre_clock_opt
+Start CPD check: check_placement_utilization_violation 
+ 
+****************************************
+  Report : Chip Summary
+  Design : control_pad
+  Version: T-2022.03
+  Date   : Fri Nov 28 20:07:02 2025
+****************************************
+Std cell utilization: 1.33%  (174/(13080-0))
+(Non-fixed + Fixed)
+Std cell utilization: 1.33%  (174/(13080-0))
+(Non-fixed only)
+Chip area:            13080    sites, bbox (227.00 227.00 377.42 374.60) um
+Std cell area:        174      sites, (non-fixed:174    fixed:0)
+                      27       cells, (non-fixed:27     fixed:0)
+Macro cell area:      0        sites
+                      0        cells
+Placement blockages:  0        sites, (excluding fixed std cells)
+                      0        sites, (include fixed std cells & chimney area)
+                      0        sites, (complete p/g net blockages)
+Routing blockages:    0        sites, (partial p/g net blockages)
+                      0        sites, (routing blockages and signal pre-route)
+Lib cell count:       16 
+Avg. std cell width:  3.16 um 
+Site array:           unit     (width: 0.46 um, height: 3.69 um, rows: 40)
+Physical DB scale:    1000 db_unit = 1 um 
+
+ 
+****************************************
+  Report : pnet options
+  Design : control_pad
+  Version: T-2022.03
+  Date   : Fri Nov 28 20:07:02 2025
+****************************************
+
+
+--------------------------------------------------------------------
+Layer      Blockage   Min_width   Min_height   Via_additive     Density
+--------------------------------------------------------------------
+METAL1     none          ---         ---       via additive      ---
+METAL2     none          ---         ---       via additive      ---
+METAL3     none          ---         ---       via additive      ---
+METAL4     none          ---         ---       via additive      ---
+METAL5     none          ---         ---       via additive      ---
+METAL6     none          ---         ---       via additive      ---
+METAL7     none          ---         ---       via additive      ---
+METAL8     none          ---         ---       via additive      ---
+
+**********************************
+      Sub-Region Utilization      
+**********************************
+Number of regions with placement utilization 0 - 0.125 is 72 (100.00%)
+Number of regions with placement utilization 0.125 - 0.25 is 0 (0.00%)
+Number of regions with placement utilization 0.25 - 0.375 is 0 (0.00%)
+Number of regions with placement utilization 0.375 - 0.5 is 0 (0.00%)
+Number of regions with placement utilization 0.5 - 0.625 is 0 (0.00%)
+Number of regions with placement utilization 0.625 - 0.75 is 0 (0.00%)
+Number of regions with placement utilization 0.75 - 0.875 is 0 (0.00%)
+Number of regions with placement utilization 0.875 - 1 is 0 (0.00%)
+1
+
+1
+End CPD check: check_placement_utilization_violation
+Start CPD check: check_legality_violation 
+Warning: Could not read any link_library files. The link_library setting {"*", "typical_1v2c25.db", "SP013D3_V1p2_typ.db", "typical_1v2c25.db", "SP013D3_V1p2_typ.db"} may be invalid. (UID-349)
+
+Warning: Cell PVSS5AP has no orientation; check FRAM library library /home/eda/lib/smic/SP013D3_V1p4/apollo/SP013D3_V1p2_8MT cell symmetry.  (PSYN-650)
+Warning: Cell PVSS5AP orientation is set to the default. (PSYN-651)
+Warning: Cell PVSS4AP has no orientation; check FRAM library library /home/eda/lib/smic/SP013D3_V1p4/apollo/SP013D3_V1p2_8MT cell symmetry.  (PSYN-650)
+Warning: Cell PVSS4AP orientation is set to the default. (PSYN-651)
+Warning: Cell PVSS2AP has no orientation; check FRAM library library /home/eda/lib/smic/SP013D3_V1p4/apollo/SP013D3_V1p2_8MT cell symmetry.  (PSYN-650)
+Warning: Cell PVSS2AP orientation is set to the default. (PSYN-651)
+Warning: Cell PVDD5AP has no orientation; check FRAM library library /home/eda/lib/smic/SP013D3_V1p4/apollo/SP013D3_V1p2_8MT cell symmetry.  (PSYN-650)
+Warning: Cell PVDD5AP orientation is set to the default. (PSYN-651)
+Warning: Cell PVDD4AP has no orientation; check FRAM library library /home/eda/lib/smic/SP013D3_V1p4/apollo/SP013D3_V1p2_8MT cell symmetry.  (PSYN-650)
+Warning: Cell PVDD4AP orientation is set to the default. (PSYN-651)
+Warning: Cell PVDD2AP has no orientation; check FRAM library library /home/eda/lib/smic/SP013D3_V1p4/apollo/SP013D3_V1p2_8MT cell symmetry.  (PSYN-650)
+Warning: Cell PVDD2AP orientation is set to the default. (PSYN-651)
+Warning: Cell PDIODE8S has no orientation; check FRAM library library /home/eda/lib/smic/SP013D3_V1p4/apollo/SP013D3_V1p2_8MT cell symmetry.  (PSYN-650)
+Warning: Cell PDIODE8S orientation is set to the default. (PSYN-651)
+Warning: Reference TLATNTSCAX8 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNTSCAX6 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNTSCAX4 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNTSCAX3 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNTSCAX20 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNTSCAX2 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNTSCAX16 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNTSCAX12 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNCAX8 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNCAX6 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNCAX4 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNCAX3 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNCAX20 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNCAX2 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNCAX16 contains internal pins with clock attribute. (TIM-103)
+Warning: Reference TLATNCAX12 contains internal pins with clock attribute. (TIM-103)
+  Loading design 'control_pad'
+
+
+[begin initializing data for legality checker]
+
+Initializing Data Structure ...
+INFO: legalizer_via_spacing_check_mode 0
+  Reading technology information ...
+    Technology table contains 8 routable metal layers
+    Top most routable layer is set to be metal6
+    This is considered as a 6-metal-layer design
+    Reading library information from DB ...
+  Reading misc information ...
+    array <unit> has 0 vertical and 40 horizontal rows
+    14 pre-routes for placement blockage/checking
+    14 pre-routes for map congestion calculation
+  Checking information read in ...
+    design style = Horizontal masters, Horizontal rows
+
+  Preprocessing design ...
+    splitting rows by natural obstacles ...
+... design style 0
+... number of base array 1 0
+INFO:... use original rows...
+[end initializing data for legality checker]
+Warning: Die area is not integer multiples of min site height (3690), object's width and height(604420,604000). (PSYN-523)
+Warning: Die area is not integer multiples of min site width (460), object's width and height(604420,604000). (PSYN-523)
+Warning: Cell i_sel is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_sel is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_data_e is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_data_e is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_halt is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_halt is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_inc_pc is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_inc_pc is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_ld_pc is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_ld_pc is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_ld_ac is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_ld_ac is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_ld_ir is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_ld_ir is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_wr is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_wr is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_rd is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_rd is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_opcode_2 is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_opcode_2 is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_opcode_1 is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_opcode_1 is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_opcode_0 is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_opcode_0 is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_zero is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_zero is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_clk is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_clk is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+Warning: Cell i_rst is not integer multiples of min site width (460), object's width and height(35000,197000). (PSYN-523)
+Warning: Cell i_rst is not integer multiples of min site height (3690), object's width and height(197000,197000). (PSYN-523)
+
+**************************************************** 
+Check_legality: Report for Fixed Placement Cells
+Information: Use the -verbose option to get details about the legality violations. (PSYN-054)
+**************************************************** 
+(fixed placement) Cells Not on Row            : 0
+(fixed placement) Cell Overlaps               : 0
+(fixed placement) Cells overlapping blockages : 0
+(fixed placement) Orientation Violations      : 0
+(fixed placement) Site Violations             : 0
+(fixed placement) Power Strap Violations      : 0
+****************************************************** 
+
+****************************************************** 
+Check_legality: Report for Non-fixed Placement Cells
+Information: Use the -verbose option to get details about the legality violations. (PSYN-054)
+****************************************************** 
+Number of Cells Not on Row            : 0
+Number of Cell Overlaps               : 0
+Number of Cells overlapping blockages : 0
+Number of Orientation Violations      : 0
+Number of Site Violations             : 0
+Number of Power Strap Violations      : 0
+******************************************** 
+
+  Total moveable cell area: 295.3
+  Total fixed cell area: 103425.0
+  Total physical cell area: 103720.3
+  Core area: (227000 227000 377420 374600)
+1
+
+
+End CPD check: check_legality_violation
+Start CPD check: cpd_check_tie_connection 
+0
+End CPD check: cpd_check_tie_connection
+Start CPD check: cpd_check_cells_restrictions 
+0
+End CPD check: cpd_check_cells_restrictions
+Start CPD check: check_unplaced_cells 
+1
+End CPD check: check_unplaced_cells
+Start CPD check: check_clock_tree 
+Information: Updating design information... (UID-85)
+
+*********************** Check_Clock_Tree Summary Report ************************
+There is no issue found !
+******************** End of Check_Clock_Tree Summary Report ********************
+1
+End CPD check: check_clock_tree
+Start CPD check: check_net_routing_rules 
+
+****************************************
+Report : net routing rules
+Design : cts
+Version: T-2022.03
+Date   : Fri Nov 28 20:07:03 2025
+****************************************
+
+
+ ---------- All nets use DEFAULT routing rule ----------
+ -------------------------------------------------------
+
+1
+End CPD check: check_net_routing_rules

@@ -1,0 +1,66 @@
+ 
+****************************************
+Report : timing
+        -path full_clock
+        -delay min
+        -physical
+        -derate
+        -input_pins
+        -nets
+        -max_paths 1
+        -transition_time
+        -crosstalk_delta
+        -capacitance
+Design : control_pad
+Version: T-2022.03
+Date   : Fri Nov 28 20:06:27 2025
+****************************************
+
+ * Some/all delay information is back-annotated.
+
+Operating Conditions: typical_1v2c25   Library: typical_1v2c25
+
+  Startpoint: i_control/state_reg[2]
+              (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: i_control/state_reg[0]
+            (rising edge-triggered flip-flop clocked by clk)
+  Path Group: clk
+  Path Type: min
+
+Attributes:
+    d - dont_touch
+    u - dont_use
+   mo - map_only
+   so - size_only
+    i - ideal_net or ideal_network
+
+  Point                        Fanout       Cap     DTran     Trans     Delta     Derate      Incr       Path      Location / Load        Attributes
+  --------------------------------------------------------------------------------------------------------------------------------------------------
+  clock clk (rise edge)                                                                      0.000      0.000
+  clock network delay (ideal)                                                                0.000      0.000
+  i_control/state_reg[2]/CK (DFFRX1)                0.000     0.000     0.000                0.000      0.000 r    (323.30,247.71)        so i 
+  i_control/state_reg[2]/QN (DFFRX1)                          0.094                          0.197      0.197 f    (317.25,247.46)        so 
+  n21 (net)                      2        0.011                                              0.000      0.197 f    [0.01,0.01]
+  U34/B (NOR2XL)                                    0.000     0.094     0.000                0.000 *    0.197 f    (308.62,287.79)
+  U34/Y (NOR2XL)                                              0.234                          0.167      0.365 r    (307.89,287.86)
+  n5 (net)                       2        0.007                                              0.000      0.365 r    [0.00,0.01]
+  U36/B0 (AOI2BB1XL)                                0.000     0.234     0.000                0.000 *    0.365 r    (287.46,288.14)
+  U36/Y (AOI2BB1XL)                                           0.106                          0.100      0.465 f    (286.64,287.76)
+  n19 (net)                      1        0.008                                              0.000      0.465 f    [0.01,0.01]
+  i_control/state_reg[0]/D (DFFRXL)                 0.000     0.106     0.000                0.000 *    0.465 f    (275.56,247.21)        so 
+  data arrival time                                                                                     0.465
+
+  clock clk (rise edge)                                                                      0.000      0.000
+  clock network delay (ideal)                                                                0.000      0.000
+  clock uncertainty                                                                          0.200      0.200
+  i_control/state_reg[0]/CK (DFFRXL)                                                         0.000      0.200 r
+  library hold time                                                                         -0.058      0.142
+  data required time                                                                                    0.142
+  --------------------------------------------------------------------------------------------------------------------------------------------------
+  data required time                                                                                    0.142
+  data arrival time                                                                                    -0.465
+  --------------------------------------------------------------------------------------------------------------------------------------------------
+  slack (MET)                                                                                           0.323
+
+
+1

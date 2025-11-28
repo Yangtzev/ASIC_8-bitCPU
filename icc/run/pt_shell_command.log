@@ -1,0 +1,3893 @@
+#@ # 
+#@ # Running pt_shell Version T-2022.03 for linux64 -- Feb 27, 2022
+#@ # Date:   Fri Nov 28 20:09:54 2025
+#@ # Run by: user123@eda
+#@ 
+
+source /opt/synopsys/prime/T-2022.03/admin/setup/.synopsys_pt.setup
+#@ # -- Starting source /opt/synopsys/prime/T-2022.03/admin/setup/.synopsys_pt.setup
+
+#@ #
+#@ # .synopsys_pt.setup: Initialization File for PrimeTime
+#@ #
+#@ 
+#@ 
+#@ #
+#@ # Enable stack trace output on fatal.  Not available for all architectures.
+#@ #
+#@ if { $sh_arch == "sparcOS5" || $sh_arch == "hpux10" || \
+#@      $sh_arch == "hp32" || $sh_arch == "linux" } {
+#@   set_unix_variable SYNOPSYS_TRACE ""
+#@ }
+#@ 
+#@ #
+#@ # Variable settings
+#@ #
+#@ 
+#@ #
+#@ # Synopsys strongly recommends that you use new variable message
+#@ # tracing for debugging purposes only.
+#@ #
+#@ set sh_new_variable_message true
+#@ 
+#@ #
+#@ # Synopsys strongly recommends that you uncomment the following command
+#@ # in order to set sh_command_abbrev_mode to the value "Command-Line-Only".
+#@ # Command abbreviation is intended as an interactive convenience.  Using
+#@ # abbreviations in scripts can cause commands to fail in subsequent releases.
+#@ # 
+#@ #set sh_command_abbrev_mode "Command-Line-Only"
+#@ 
+#@ #
+#@ # Some useful aliases
+#@ #
+#@ alias list_commands		help
+#@ alias report_constraints	report_constraint
+#@ alias report_clocks		report_clock
+#@ 
+#@ #
+#@ # The alias for get_clock was added when get_clock_network_objects
+#@ # was introduced, as it conflicts with get_clocks (and get_clock is a
+#@ # typical abbreviation for get_clocks)
+#@ #
+#@ alias get_clock get_clocks
+#@ 
+#@ 
+#@ #
+#@ #
+#@ # The alias of q to quit is commented out.  Remove the comment 
+#@ # character if you want this alias.  Some users find that having 
+#@ # this particular alias causes problems when mixed with page-mode
+#@ # for reports - an accidental repeated 'q' not only cancels the
+#@ # output but exits the tool.
+#@ #
+#@ #alias q quit
+#@ 
+#@ # -- End source /opt/synopsys/prime/T-2022.03/admin/setup/.synopsys_pt.setup
+
+#@ # -- Starting source /opt/synopsys/prime/T-2022.03/auxx/tcllib/lib/itcl4.2.1/itcl.tcl
+
+#@ #
+#@ # itcl.tcl
+#@ # ----------------------------------------------------------------------
+#@ # Invoked automatically upon startup to customize the interpreter
+#@ # for [incr Tcl].
+#@ # ----------------------------------------------------------------------
+#@ #   AUTHOR:  Michael J. McLennan
+#@ #            Bell Labs Innovations for Lucent Technologies
+#@ #            mmclennan@lucent.com
+#@ #            http://www.tcltk.com/itcl
+#@ # ----------------------------------------------------------------------
+#@ #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
+#@ # ======================================================================
+#@ # See the file "license.terms" for information on usage and
+#@ # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#@ 
+#@ proc ::itcl::delete_helper { name args } {
+#@     ::itcl::delete object $name
+#@ }
+#@ 
+#@ # ----------------------------------------------------------------------
+#@ #  USAGE:  local <className> <objName> ?<arg> <arg>...?
+#@ #
+#@ #  Creates a new object called <objName> in class <className>, passing
+#@ #  the remaining <arg>'s to the constructor.  Unlike the usual
+#@ #  [incr Tcl] objects, however, an object created by this procedure
+#@ #  will be automatically deleted when the local call frame is destroyed.
+#@ #  This command is useful for creating objects that should only remain
+#@ #  alive until a procedure exits.
+#@ # ----------------------------------------------------------------------
+#@ proc ::itcl::local {class name args} {
+#@     set ptr [uplevel [list $class $name] $args]
+#@     uplevel [list set itcl-local-$ptr $ptr]
+#@     set cmd [uplevel namespace which -command $ptr]
+#@     uplevel [list trace variable itcl-local-$ptr u \
+#@         "::itcl::delete_helper $cmd"]
+#@     return $ptr
+#@ }
+#@ 
+#@ # ----------------------------------------------------------------------
+#@ # auto_mkindex
+#@ # ----------------------------------------------------------------------
+#@ # Define Itcl commands that will be recognized by the auto_mkindex
+#@ # parser in Tcl...
+#@ #
+#@ 
+#@ #
+#@ # USAGE:  itcl::class name body
+#@ # Adds an entry for the given class declaration.
+#@ #
+#@ foreach __cmd {itcl::class class itcl::type type ictl::widget widget itcl::widgetadaptor widgetadaptor itcl::extendedclass extendedclass} {
+#@     auto_mkindex_parser::command $__cmd {name body} {
+#@ 	variable index
+#@ 	variable scriptFile
+#@ 	append index "set [list auto_index([fullname $name])]"
+#@ 	append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+#@ 
+#@ 	variable parser
+#@ 	variable contextStack
+#@ 	set contextStack [linsert $contextStack 0 $name]
+#@ 	$parser eval $body
+#@ 	set contextStack [lrange $contextStack 1 end]
+#@     }
+#@ }
+#@ # -- Starting source /opt/synopsys/prime/T-2022.03/auxx/tcllib/lib/tcl8.6/auto.tcl
+
+#@ # auto.tcl --
+#@ #
+#@ # utility procs formerly in init.tcl dealing with auto execution of commands
+#@ # and can be auto loaded themselves.
+#@ #
+#@ # Copyright (c) 1991-1993 The Regents of the University of California.
+#@ # Copyright (c) 1994-1998 Sun Microsystems, Inc.
+#@ #
+#@ # See the file "license.terms" for information on usage and redistribution of
+#@ # this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#@ #
+#@ 
+#@ # auto_reset --
+#@ #
+#@ # Destroy all cached information for auto-loading and auto-execution, so that
+#@ # the information gets recomputed the next time it's needed.  Also delete any
+#@ # commands that are listed in the auto-load index.
+#@ #
+#@ # Arguments:
+#@ # None.
+#@ 
+#@ proc auto_reset {} {
+#@     global auto_execs auto_index auto_path
+#@     if {[array exists auto_index]} {
+#@ 	foreach cmdName [array names auto_index] {
+#@ 	    set fqcn [namespace which $cmdName]
+#@ 	    if {$fqcn eq ""} {
+#@ 		continue
+#@ 	    }
+#@ 	    rename $fqcn {}
+#@ 	}
+#@     }
+#@     unset -nocomplain auto_execs auto_index ::tcl::auto_oldpath
+#@     if {[catch {llength $auto_path}]} {
+#@ 	set auto_path [list [info library]]
+#@     } elseif {[info library] ni $auto_path} {
+#@ 	lappend auto_path [info library]
+#@     }
+#@ }
+#@ 
+#@ # tcl_findLibrary --
+#@ #
+#@ #	This is a utility for extensions that searches for a library directory
+#@ #	using a canonical searching algorithm. A side effect is to source the
+#@ #	initialization script and set a global library variable.
+#@ #
+#@ # Arguments:
+#@ # 	basename	Prefix of the directory name, (e.g., "tk")
+#@ #	version		Version number of the package, (e.g., "8.0")
+#@ #	patch		Patchlevel of the package, (e.g., "8.0.3")
+#@ #	initScript	Initialization script to source (e.g., tk.tcl)
+#@ #	enVarName	environment variable to honor (e.g., TK_LIBRARY)
+#@ #	varName		Global variable to set when done (e.g., tk_library)
+#@ 
+#@ proc tcl_findLibrary {basename version patch initScript enVarName varName} {
+#@     upvar #0 $varName the_library
+#@     global auto_path env tcl_platform
+#@ 
+#@     set dirs {}
+#@     set errors {}
+#@ 
+#@     # The C application may have hardwired a path, which we honor
+#@ 
+#@     if {[info exists the_library] && $the_library ne ""} {
+#@ 	lappend dirs $the_library
+#@     } else {
+#@ 	# Do the canonical search
+#@ 
+#@ 	# 1. From an environment variable, if it exists.  Placing this first
+#@ 	#    gives the end-user ultimate control to work-around any bugs, or
+#@ 	#    to customize.
+#@ 
+#@         if {[info exists env($enVarName)]} {
+#@             lappend dirs $env($enVarName)
+#@         }
+#@ 
+#@ 	# 2. In the package script directory registered within the
+#@ 	#    configuration of the package itself.
+#@ 
+#@ 	catch {
+#@ 	    lappend dirs [::${basename}::pkgconfig get scriptdir,runtime]
+#@ 	}
+#@ 
+#@ 	# 3. Relative to auto_path directories.  This checks relative to the
+#@ 	# Tcl library as well as allowing loading of libraries added to the
+#@ 	# auto_path that is not relative to the core library or binary paths.
+#@ 	foreach d $auto_path {
+#@ 	    lappend dirs [file join $d $basename$version]
+#@ 	    if {$tcl_platform(platform) eq "unix"
+#@ 		    && $tcl_platform(os) eq "Darwin"} {
+#@ 		# 4. On MacOSX, check the Resources/Scripts subdir too
+#@ 		lappend dirs [file join $d $basename$version Resources Scripts]
+#@ 	    }
+#@ 	}
+#@ 
+#@ 	# 3. Various locations relative to the executable
+#@ 	# ../lib/foo1.0		(From bin directory in install hierarchy)
+#@ 	# ../../lib/foo1.0	(From bin/arch directory in install hierarchy)
+#@ 	# ../library		(From unix directory in build hierarchy)
+#@ 	#
+#@ 	# Remaining locations are out of date (when relevant, they ought to be
+#@ 	# covered by the $::auto_path seach above) and disabled.
+#@ 	#
+#@ 	# ../../library		(From unix/arch directory in build hierarchy)
+#@ 	# ../../foo1.0.1/library
+#@ 	#		(From unix directory in parallel build hierarchy)
+#@ 	# ../../../foo1.0.1/library
+#@ 	#		(From unix/arch directory in parallel build hierarchy)
+#@ 
+#@         set parentDir [file dirname [file dirname [info nameofexecutable]]]
+#@         set grandParentDir [file dirname $parentDir]
+#@         lappend dirs [file join $parentDir lib $basename$version]
+#@         lappend dirs [file join $grandParentDir lib $basename$version]
+#@         lappend dirs [file join $parentDir library]
+#@ 	if {0} {
+#@ 	    lappend dirs [file join $grandParentDir library]
+#@ 	    lappend dirs [file join $grandParentDir $basename$patch library]
+#@ 	    lappend dirs [file join [file dirname $grandParentDir] \
+#@ 			      $basename$patch library]
+#@ 	}
+#@     }
+#@     # uniquify $dirs in order
+#@     array set seen {}
+#@     foreach i $dirs {
+#@ 	# Make sure $i is unique under normalization. Avoid repeated [source].
+#@ 	if {[interp issafe]} {
+#@ 	    # Safe interps have no [file normalize].
+#@ 	    set norm $i
+#@ 	} else {
+#@ 	    set norm [file normalize $i]
+#@ 	}
+#@ 	if {[info exists seen($norm)]} {
+#@ 	    continue
+#@ 	}
+#@ 	set seen($norm) {}
+#@ 
+#@         set the_library $i
+#@         set file [file join $i $initScript]
+#@ 
+#@ 	# source everything when in a safe interpreter because we have a
+#@ 	# source command, but no file exists command
+#@ 
+#@         if {[interp issafe] || [file exists $file]} {
+#@             if {![catch {uplevel #0 [list source $file]} msg opts]} {
+#@                 return
+#@             }
+#@ 	    append errors "$file: $msg\n"
+#@ 	    append errors [dict get $opts -errorinfo]\n
+#@         }
+#@     }
+#@     unset -nocomplain the_library
+#@     set msg "Can't find a usable $initScript in the following directories: \n"
+#@     append msg "    $dirs\n\n"
+#@     append msg "$errors\n\n"
+#@     append msg "This probably means that $basename wasn't installed properly.\n"
+#@     error $msg
+#@ }
+#@ 
+#@ 
+#@ # ----------------------------------------------------------------------
+#@ # auto_mkindex
+#@ # ----------------------------------------------------------------------
+#@ # The following procedures are used to generate the tclIndex file from Tcl
+#@ # source files.  They use a special safe interpreter to parse Tcl source
+#@ # files, writing out index entries as "proc" commands are encountered.  This
+#@ # implementation won't work in a safe interpreter, since a safe interpreter
+#@ # can't create the special parser and mess with its commands.
+#@ 
+#@ if {[interp issafe]} {
+#@     return	;# Stop sourcing the file here
+#@ }
+#@ 
+#@ # auto_mkindex --
+#@ # Regenerate a tclIndex file from Tcl source files.  Takes as argument the
+#@ # name of the directory in which the tclIndex file is to be placed, followed
+#@ # by any number of glob patterns to use in that directory to locate all of the
+#@ # relevant files.
+#@ #
+#@ # Arguments:
+#@ # dir -		Name of the directory in which to create an index.
+#@ 
+#@ # args -	Any number of additional arguments giving the names of files
+#@ #		within dir.  If no additional are given auto_mkindex will look
+#@ #		for *.tcl.
+#@ 
+#@ proc auto_mkindex {dir args} {
+#@     if {[interp issafe]} {
+#@         error "can't generate index within safe interpreter"
+#@     }
+#@ 
+#@     set oldDir [pwd]
+#@     cd $dir
+#@ 
+#@     append index "# Tcl autoload index file, version 2.0\n"
+#@     append index "# This file is generated by the \"auto_mkindex\" command\n"
+#@     append index "# and sourced to set up indexing information for one or\n"
+#@     append index "# more commands.  Typically each line is a command that\n"
+#@     append index "# sets an element in the auto_index array, where the\n"
+#@     append index "# element name is the name of a command and the value is\n"
+#@     append index "# a script that loads the command.\n\n"
+#@     if {![llength $args]} {
+#@ 	set args *.tcl
+#@     }
+#@ 
+#@     auto_mkindex_parser::init
+#@     foreach file [lsort [glob -- {*}$args]] {
+#@ 	try {
+#@ 	    append index [auto_mkindex_parser::mkindex $file]
+#@ 	} on error {msg opts} {
+#@ 	    cd $oldDir
+#@ 	    return -options $opts $msg
+#@ 	}
+#@     }
+#@     auto_mkindex_parser::cleanup
+#@ 
+#@     set fid [open "tclIndex" w]
+#@     puts -nonewline $fid $index
+#@     close $fid
+#@     cd $oldDir
+#@ }
+#@ 
+#@ # Original version of auto_mkindex that just searches the source code for
+#@ # "proc" at the beginning of the line.
+#@ 
+#@ proc auto_mkindex_old {dir args} {
+#@     set oldDir [pwd]
+#@     cd $dir
+#@     set dir [pwd]
+#@     append index "# Tcl autoload index file, version 2.0\n"
+#@     append index "# This file is generated by the \"auto_mkindex\" command\n"
+#@     append index "# and sourced to set up indexing information for one or\n"
+#@     append index "# more commands.  Typically each line is a command that\n"
+#@     append index "# sets an element in the auto_index array, where the\n"
+#@     append index "# element name is the name of a command and the value is\n"
+#@     append index "# a script that loads the command.\n\n"
+#@     if {![llength $args]} {
+#@ 	set args *.tcl
+#@     }
+#@     foreach file [lsort [glob -- {*}$args]] {
+#@ 	set f ""
+#@ 	set error [catch {
+#@ 	    set f [open $file]
+#@ 	    fconfigure $f -eofchar \032
+#@ 	    while {[gets $f line] >= 0} {
+#@ 		if {[regexp {^proc[ 	]+([^ 	]*)} $line match procName]} {
+#@ 		    set procName [lindex [auto_qualify $procName "::"] 0]
+#@ 		    append index "set [list auto_index($procName)]"
+#@ 		    append index " \[list source \[file join \$dir [list $file]\]\]\n"
+#@ 		}
+#@ 	    }
+#@ 	    close $f
+#@ 	} msg opts]
+#@ 	if {$error} {
+#@ 	    catch {close $f}
+#@ 	    cd $oldDir
+#@ 	    return -options $opts $msg
+#@ 	}
+#@     }
+#@     set f ""
+#@     set error [catch {
+#@ 	set f [open tclIndex w]
+#@ 	puts -nonewline $f $index
+#@ 	close $f
+#@ 	cd $oldDir
+#@     } msg opts]
+#@     if {$error} {
+#@ 	catch {close $f}
+#@ 	cd $oldDir
+#@ 	error $msg $info $code
+#@ 	return -options $opts $msg
+#@     }
+#@ }
+#@ 
+#@ # Create a safe interpreter that can be used to parse Tcl source files
+#@ # generate a tclIndex file for autoloading.  This interp contains commands for
+#@ # things that need index entries.  Each time a command is executed, it writes
+#@ # an entry out to the index file.
+#@ 
+#@ namespace eval auto_mkindex_parser {
+#@     variable parser ""          ;# parser used to build index
+#@     variable index ""           ;# maintains index as it is built
+#@     variable scriptFile ""      ;# name of file being processed
+#@     variable contextStack ""    ;# stack of namespace scopes
+#@     variable imports ""         ;# keeps track of all imported cmds
+#@     variable initCommands       ;# list of commands that create aliases
+#@     if {![info exists initCommands]} {
+#@ 	set initCommands [list]
+#@     }
+#@ 
+#@     proc init {} {
+#@ 	variable parser
+#@ 	variable initCommands
+#@ 
+#@ 	if {![interp issafe]} {
+#@ 	    set parser [interp create -safe]
+#@ 	    $parser hide info
+#@ 	    $parser hide rename
+#@ 	    $parser hide proc
+#@ 	    $parser hide namespace
+#@ 	    $parser hide eval
+#@ 	    $parser hide puts
+#@ 	    foreach ns [$parser invokehidden namespace children ::] {
+#@ 		# MUST NOT DELETE "::tcl" OR BAD THINGS HAPPEN!
+#@ 		if {$ns eq "::tcl"} continue
+#@ 		$parser invokehidden namespace delete $ns
+#@ 	    }
+#@ 	    foreach cmd [$parser invokehidden info commands ::*] {
+#@ 		$parser invokehidden rename $cmd {}
+#@ 	    }
+#@ 	    $parser invokehidden proc unknown {args} {}
+#@ 
+#@ 	    # We'll need access to the "namespace" command within the
+#@ 	    # interp.  Put it back, but move it out of the way.
+#@ 
+#@ 	    $parser expose namespace
+#@ 	    $parser invokehidden rename namespace _%@namespace
+#@ 	    $parser expose eval
+#@ 	    $parser invokehidden rename eval _%@eval
+#@ 
+#@ 	    # Install all the registered psuedo-command implementations
+#@ 
+#@ 	    foreach cmd $initCommands {
+#@ 		eval $cmd
+#@ 	    }
+#@ 	}
+#@     }
+#@     proc cleanup {} {
+#@ 	variable parser
+#@ 	interp delete $parser
+#@ 	unset parser
+#@     }
+#@ }
+#@ 
+#@ # auto_mkindex_parser::mkindex --
+#@ #
+#@ # Used by the "auto_mkindex" command to create a "tclIndex" file for the given
+#@ # Tcl source file.  Executes the commands in the file, and handles things like
+#@ # the "proc" command by adding an entry for the index file.  Returns a string
+#@ # that represents the index file.
+#@ #
+#@ # Arguments:
+#@ #	file	Name of Tcl source file to be indexed.
+#@ 
+#@ proc auto_mkindex_parser::mkindex {file} {
+#@     variable parser
+#@     variable index
+#@     variable scriptFile
+#@     variable contextStack
+#@     variable imports
+#@ 
+#@     set scriptFile $file
+#@ 
+#@     set fid [open $file]
+#@     fconfigure $fid -eofchar \032
+#@     set contents [read $fid]
+#@     close $fid
+#@ 
+#@     # There is one problem with sourcing files into the safe interpreter:
+#@     # references like "$x" will fail since code is not really being executed
+#@     # and variables do not really exist.  To avoid this, we replace all $ with
+#@     # \0 (literally, the null char) later, when getting proc names we will
+#@     # have to reverse this replacement, in case there were any $ in the proc
+#@     # name.  This will cause a problem if somebody actually tries to have a \0
+#@     # in their proc name.  Too bad for them.
+#@     set contents [string map [list \$ \0] $contents]
+#@ 
+#@     set index ""
+#@     set contextStack ""
+#@     set imports ""
+#@ 
+#@     $parser eval $contents
+#@ 
+#@     foreach name $imports {
+#@         catch {$parser eval [list _%@namespace forget $name]}
+#@     }
+#@     return $index
+#@ }
+#@ 
+#@ # auto_mkindex_parser::hook command
+#@ #
+#@ # Registers a Tcl command to evaluate when initializing the child interpreter
+#@ # used by the mkindex parser.  The command is evaluated in the parent
+#@ # interpreter, and can use the variable auto_mkindex_parser::parser to get to
+#@ # the child
+#@ 
+#@ proc auto_mkindex_parser::hook {cmd} {
+#@     variable initCommands
+#@ 
+#@     lappend initCommands $cmd
+#@ }
+#@ 
+#@ # auto_mkindex_parser::slavehook command
+#@ #
+#@ # Registers a Tcl command to evaluate when initializing the child interpreter
+#@ # used by the mkindex parser.  The command is evaluated in the child
+#@ # interpreter.
+#@ 
+#@ proc auto_mkindex_parser::slavehook {cmd} {
+#@     variable initCommands
+#@ 
+#@     # The $parser variable is defined to be the name of the child interpreter
+#@     # when this command is used later.
+#@ 
+#@     lappend initCommands "\$parser eval [list $cmd]"
+#@ }
+#@ 
+#@ # auto_mkindex_parser::command --
+#@ #
+#@ # Registers a new command with the "auto_mkindex_parser" interpreter that
+#@ # parses Tcl files.  These commands are fake versions of things like the
+#@ # "proc" command.  When you execute them, they simply write out an entry to a
+#@ # "tclIndex" file for auto-loading.
+#@ #
+#@ # This procedure allows extensions to register their own commands with the
+#@ # auto_mkindex facility.  For example, a package like [incr Tcl] might
+#@ # register a "class" command so that class definitions could be added to a
+#@ # "tclIndex" file for auto-loading.
+#@ #
+#@ # Arguments:
+#@ #	name 	Name of command recognized in Tcl files.
+#@ #	arglist	Argument list for command.
+#@ #	body 	Implementation of command to handle indexing.
+#@ 
+#@ proc auto_mkindex_parser::command {name arglist body} {
+#@     hook [list auto_mkindex_parser::commandInit $name $arglist $body]
+#@ }
+#@ 
+#@ # auto_mkindex_parser::commandInit --
+#@ #
+#@ # This does the actual work set up by auto_mkindex_parser::command. This is
+#@ # called when the interpreter used by the parser is created.
+#@ #
+#@ # Arguments:
+#@ #	name 	Name of command recognized in Tcl files.
+#@ #	arglist	Argument list for command.
+#@ #	body 	Implementation of command to handle indexing.
+#@ 
+#@ proc auto_mkindex_parser::commandInit {name arglist body} {
+#@     variable parser
+#@ 
+#@     set ns [namespace qualifiers $name]
+#@     set tail [namespace tail $name]
+#@     if {$ns eq ""} {
+#@         set fakeName [namespace current]::_%@fake_$tail
+#@     } else {
+#@         set fakeName [namespace current]::[string map {:: _} _%@fake_$name]
+#@     }
+#@     proc $fakeName $arglist $body
+#@ 
+#@     # YUK!  Tcl won't let us alias fully qualified command names, so we can't
+#@     # handle names like "::itcl::class".  Instead, we have to build procs with
+#@     # the fully qualified names, and have the procs point to the aliases.
+#@ 
+#@     if {[string match *::* $name]} {
+#@         set exportCmd [list _%@namespace export [namespace tail $name]]
+#@         $parser eval [list _%@namespace eval $ns $exportCmd]
+#@ 
+#@ 	# The following proc definition does not work if you want to tolerate
+#@ 	# space or something else diabolical in the procedure name, (i.e.,
+#@ 	# space in $alias). The following does not work:
+#@ 	#   "_%@eval {$alias} \$args"
+#@ 	# because $alias gets concat'ed to $args.  The following does not work
+#@ 	# because $cmd is somehow undefined
+#@ 	#   "set cmd {$alias} \; _%@eval {\$cmd} \$args"
+#@ 	# A gold star to someone that can make test autoMkindex-3.3 work
+#@ 	# properly
+#@ 
+#@         set alias [namespace tail $fakeName]
+#@         $parser invokehidden proc $name {args} "_%@eval {$alias} \$args"
+#@         $parser alias $alias $fakeName
+#@     } else {
+#@         $parser alias $name $fakeName
+#@     }
+#@     return
+#@ }
+#@ 
+#@ # auto_mkindex_parser::fullname --
+#@ #
+#@ # Used by commands like "proc" within the auto_mkindex parser.  Returns the
+#@ # qualified namespace name for the "name" argument.  If the "name" does not
+#@ # start with "::", elements are added from the current namespace stack to
+#@ # produce a qualified name.  Then, the name is examined to see whether or not
+#@ # it should really be qualified.  If the name has more than the leading "::",
+#@ # it is returned as a fully qualified name.  Otherwise, it is returned as a
+#@ # simple name.  That way, the Tcl autoloader will recognize it properly.
+#@ #
+#@ # Arguments:
+#@ # name -		Name that is being added to index.
+#@ 
+#@ proc auto_mkindex_parser::fullname {name} {
+#@     variable contextStack
+#@ 
+#@     if {![string match ::* $name]} {
+#@         foreach ns $contextStack {
+#@             set name "${ns}::$name"
+#@             if {[string match ::* $name]} {
+#@                 break
+#@             }
+#@         }
+#@     }
+#@ 
+#@     if {[namespace qualifiers $name] eq ""} {
+#@         set name [namespace tail $name]
+#@     } elseif {![string match ::* $name]} {
+#@         set name "::$name"
+#@     }
+#@ 
+#@     # Earlier, mkindex replaced all $'s with \0.  Now, we have to reverse that
+#@     # replacement.
+#@     return [string map [list \0 \$] $name]
+#@ }
+#@ 
+#@ # auto_mkindex_parser::indexEntry --
+#@ #
+#@ # Used by commands like "proc" within the auto_mkindex parser to add a
+#@ # correctly-quoted entry to the index. This is shared code so it is done
+#@ # *right*, in one place.
+#@ #
+#@ # Arguments:
+#@ # name -		Name that is being added to index.
+#@ 
+#@ proc auto_mkindex_parser::indexEntry {name} {
+#@     variable index
+#@     variable scriptFile
+#@ 
+#@     # We convert all metacharacters to their backslashed form, and pre-split
+#@     # the file name that we know about (which will be a proper list, and so
+#@     # correctly quoted).
+#@ 
+#@     set name [string range [list \}[fullname $name]] 2 end]
+#@     set filenameParts [file split $scriptFile]
+#@ 
+#@     append index [format \
+#@ 	    {set auto_index(%s) [list source [file join $dir %s]]%s} \
+#@ 	    $name $filenameParts \n]
+#@     return
+#@ }
+#@ 
+#@ if {[llength $::auto_mkindex_parser::initCommands]} {
+#@     return
+#@ }
+#@ 
+#@ # Register all of the procedures for the auto_mkindex parser that will build
+#@ # the "tclIndex" file.
+#@ 
+#@ # AUTO MKINDEX:  proc name arglist body
+#@ # Adds an entry to the auto index list for the given procedure name.
+#@ 
+#@ auto_mkindex_parser::command proc {name args} {
+#@     indexEntry $name
+#@ }
+#@ 
+#@ # Conditionally add support for Tcl byte code files.  There are some tricky
+#@ # details here.  First, we need to get the tbcload library initialized in the
+#@ # current interpreter.  We cannot load tbcload into the child until we have
+#@ # done so because it needs access to the tcl_patchLevel variable.  Second,
+#@ # because the package index file may defer loading the library until we invoke
+#@ # a command, we need to explicitly invoke auto_load to force it to be loaded.
+#@ # This should be a noop if the package has already been loaded
+#@ 
+#@ auto_mkindex_parser::hook {
+#@     try {
+#@ 	package require tbcload
+#@     } on error {} {
+#@ 	# OK, don't have it so do nothing
+#@     } on ok {} {
+#@ 	if {[namespace which -command tbcload::bcproc] eq ""} {
+#@ 	    auto_load tbcload::bcproc
+#@ 	}
+#@ 	load {} tbcload $auto_mkindex_parser::parser
+#@ 
+#@ 	# AUTO MKINDEX:  tbcload::bcproc name arglist body
+#@ 	# Adds an entry to the auto index list for the given pre-compiled
+#@ 	# procedure name.
+#@ 
+#@ 	auto_mkindex_parser::commandInit tbcload::bcproc {name args} {
+#@ 	    indexEntry $name
+#@ 	}
+#@     }
+#@ }
+#@ 
+#@ # AUTO MKINDEX:  namespace eval name command ?arg arg...?
+#@ # Adds the namespace name onto the context stack and evaluates the associated
+#@ # body of commands.
+#@ #
+#@ # AUTO MKINDEX:  namespace import ?-force? pattern ?pattern...?
+#@ # Performs the "import" action in the parser interpreter.  This is important
+#@ # for any commands contained in a namespace that affect the index.  For
+#@ # example, a script may say "itcl::class ...", or it may import "itcl::*" and
+#@ # then say "class ...".  This procedure does the import operation, but keeps
+#@ # track of imported patterns so we can remove the imports later.
+#@ 
+#@ auto_mkindex_parser::command namespace {op args} {
+#@     switch -- $op {
+#@         eval {
+#@             variable parser
+#@             variable contextStack
+#@ 
+#@             set name [lindex $args 0]
+#@             set args [lrange $args 1 end]
+#@ 
+#@             set contextStack [linsert $contextStack 0 $name]
+#@ 	    $parser eval [list _%@namespace eval $name] $args
+#@             set contextStack [lrange $contextStack 1 end]
+#@         }
+#@         import {
+#@             variable parser
+#@             variable imports
+#@             foreach pattern $args {
+#@                 if {$pattern ne "-force"} {
+#@                     lappend imports $pattern
+#@                 }
+#@             }
+#@             catch {$parser eval "_%@namespace import $args"}
+#@         }
+#@ 	ensemble {
+#@ 	    variable parser
+#@ 	    variable contextStack
+#@ 	    if {[lindex $args 0] eq "create"} {
+#@ 		set name ::[join [lreverse $contextStack] ::]
+#@ 		catch {
+#@ 		    set name [dict get [lrange $args 1 end] -command]
+#@ 		    if {![string match ::* $name]} {
+#@ 			set name ::[join [lreverse $contextStack] ::]$name
+#@ 		    }
+#@ 		    regsub -all ::+ $name :: name
+#@ 		}
+#@ 		# create artifical proc to force an entry in the tclIndex
+#@ 		$parser eval [list ::proc $name {} {}]
+#@ 	    }
+#@ 	}
+#@     }
+#@ }
+#@ 
+#@ # AUTO MKINDEX:  oo::class create name ?definition?
+#@ # Adds an entry to the auto index list for the given class name.
+#@ auto_mkindex_parser::command oo::class {op name {body ""}} {
+#@     if {$op eq "create"} {
+#@ 	indexEntry $name
+#@     }
+#@ }
+#@ auto_mkindex_parser::command class {op name {body ""}} {
+#@     if {$op eq "create"} {
+#@ 	indexEntry $name
+#@     }
+#@ }
+#@ 
+#@ return
+#@ # -- End source /opt/synopsys/prime/T-2022.03/auxx/tcllib/lib/tcl8.6/auto.tcl
+
+#@ 
+#@ #
+#@ # USAGE:  itcl::body name arglist body
+#@ # Adds an entry for the given method/proc body.
+#@ #
+#@ foreach __cmd {itcl::body body} {
+#@     auto_mkindex_parser::command $__cmd {name arglist body} {
+#@ 	variable index
+#@ 	variable scriptFile
+#@ 	append index "set [list auto_index([fullname $name])]"
+#@ 	append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+#@     }
+#@ }
+#@ 
+#@ #
+#@ # USAGE:  itcl::configbody name arglist body
+#@ # Adds an entry for the given method/proc body.
+#@ #
+#@ foreach __cmd {itcl::configbody configbody} {
+#@     auto_mkindex_parser::command $__cmd {name body} {
+#@ 	variable index
+#@ 	variable scriptFile
+#@ 	append index "set [list auto_index([fullname $name])]"
+#@ 	append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+#@     }
+#@ }
+#@ 
+#@ #
+#@ # USAGE:  ensemble name ?body?
+#@ # Adds an entry to the auto index list for the given ensemble name.
+#@ #
+#@ foreach __cmd {itcl::ensemble ensemble} {
+#@     auto_mkindex_parser::command $__cmd {name {body ""}} {
+#@ 	variable index
+#@ 	variable scriptFile
+#@ 	append index "set [list auto_index([fullname $name])]"
+#@ 	append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+#@     }
+#@ }
+#@ 
+#@ #
+#@ # USAGE:  public arg ?arg arg...?
+#@ #         protected arg ?arg arg...?
+#@ #         private arg ?arg arg...?
+#@ #
+#@ # Evaluates the arguments as commands, so we can recognize proc
+#@ # declarations within classes.
+#@ #
+#@ foreach __cmd {public protected private} {
+#@     auto_mkindex_parser::command $__cmd {args} {
+#@         variable parser
+#@         $parser eval $args
+#@     }
+#@ }
+#@ 
+#@ # SF bug #246 unset variable __cmd to avoid problems in user programs!!
+#@ unset __cmd
+#@ 
+#@ # ----------------------------------------------------------------------
+#@ # auto_import
+#@ # ----------------------------------------------------------------------
+#@ # This procedure overrides the usual "auto_import" function in the
+#@ # Tcl library.  It is invoked during "namespace import" to make see
+#@ # if the imported commands reside in an autoloaded library.  If so,
+#@ # stubs are created to represent the commands.  Executing a stub
+#@ # later on causes the real implementation to be autoloaded.
+#@ #
+#@ # Arguments -
+#@ # pattern	The pattern of commands being imported (like "foo::*")
+#@ #               a canonical namespace as returned by [namespace current]
+#@ 
+#@ proc auto_import {pattern} {
+#@     global auto_index
+#@ 
+#@     set ns [uplevel namespace current]
+#@     set patternList [auto_qualify $pattern $ns]
+#@ 
+#@     auto_load_index
+#@ 
+#@     foreach pattern $patternList {
+#@         foreach name [array names auto_index $pattern] {
+#@             if {"" == [info commands $name]} {
+#@                 ::itcl::import::stub create $name
+#@             }
+#@         }
+#@     }
+#@ }
+#@ # -- End source /opt/synopsys/prime/T-2022.03/auxx/tcllib/lib/itcl4.2.1/itcl.tcl
+
+source sdf_gen.tcl
+#@ # -- Starting source sdf_gen.tcl
+
+#@ source ../rm_setup/icrm_setup.tcl 
+#@ # -- Starting source ../rm_setup/icrm_setup.tcl
+
+#@ #########################################################################################
+#@ # Lynx Compatible Reference Methodology (LCRM) Setup File
+#@ # Script: lcrm_setup.tcl
+#@ # Version: G-2012.06 (July 2, 2012)
+#@ # Copyright (C) 2011-2012 Synopsys, Inc. All rights reserved.
+#@ #########################################################################################
+#@ ## DESCRIPTION:
+#@ ## * This script provides LCRM scripts access to a subset of Lynx functions.
+#@ ## * It manages variables and metric procedures used by the LCRM scripts when
+#@ ## * running standalone or within the Lynx Design System.
+#@ ## * 
+#@ ## * Automation Variables:
+#@ ## * The LCRM scripts utilize some variables for managing directory structures used
+#@ ## * for log files, reports, and output data. These variables are hardcoded for correct
+#@ ## * operation when running LCRM scripts standalone. When running the LCRM scripts within
+#@ ## * the Lynx Design System, these variables are under control of the flow automation.
+#@ ## * 
+#@ ## * Metrics:
+#@ ## * The lcrm_setup.tcl contains procedures to support extraction of metric information
+#@ ## * about the design and system. These appear as METRIC strings in the log file. When
+#@ ## * running within the Lynx Design System, these METRIC messages are extracted and 
+#@ ## * transfered to a database server. The Lynx Manager Cockpit application can be used
+#@ ## * to analyze and generate reports from the collected data.
+#@ ## * 
+#@ ## * Users of LCRM scripts need not modify any of the contents of this script or
+#@ ## * related references contained in each task script. These Lynx Compatabile functions
+#@ ## * work when in Lynx and when running standalone and do not add any appreciable runtime
+#@ ## * overhead.
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## Lynx System Variable. 
+#@ ## When running in Lynx, these SEV* variables are configured in the GUI and saved
+#@ ## in the system.tcl file. When running outside of Lynx, a number of SEV(*) variables 
+#@ ## need to be set to values to avoid errors in some of the metric procedures.
+#@ ## The environment variable LYNX_RTL_PRESENT is set automatically when Lynx is run and
+#@ ## is used here to setup variables according to the runtime environment
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ set SEV(src) init_design_icc
+#@ set SEV(dst) init_design_icc
+#@ 
+#@ set SEV(script_file) [info script]
+#@ 
+#@ #sproc_script_start
+#@ set ICC_FLOORPLAN_CEL $SEV(dst) 
+#@ 
+#@ #####################################################33
+#@ 
+#@ ## enable consistent script error handling across tools
+#@ set sh_continue_on_error true
+#@ 
+#@ ## not all tool tcl shells handle the source options. StarRCXT is one example needing special handling
+#@ if {[info exists synopsys_program_name]} {
+#@   if { $synopsys_program_name=="tcl" } {
+#@     set source_options ""
+#@   } else {
+#@     set source_options "-e -v"
+#@   }
+#@ } else {
+#@   # tcl program does not support -e -v options
+#@   set source_options ""
+#@ }
+#@ 
+#@ if { [info exists env(LYNX_RTM_PRESENT)] } {
+#@ 
+#@   puts "RM-Info: Lynx is setting SEV variables."
+#@   set LYNX(rtm_present) 1
+#@ 
+#@   eval source $source_options ../../scripts_global/conf/system.tcl
+#@ 
+#@   ## -----------------------------------------------------------------------------
+#@   ## Allow Lynx to define and overide dynamic System Environment Variabls
+#@   ## -----------------------------------------------------------------------------
+#@ 
+#@   eval source $source_options $env(LYNX_VARFILE_SEV)
+#@ 
+#@ } else {
+#@ 
+#@   set LYNX(rtm_present) 0
+#@   puts "RM-Info: Setting default SEV variables for running outside of Lynx."
+#@   set SEV(project_dir)    my_project_dir
+#@   set SEV(project_name)   lcrm
+#@   set SEV(release_dir)    my_release_dir
+#@   set SEV(techlib_dir)    my_techlib_dir
+#@   set SEV(metrics_enable) 1
+#@   set SEV(log_file)       my_log_file
+#@   set SEV(ver_star)       NaM
+#@   set SEV(task)           [file root [file tail $SEV(script_file)]]
+#@ 
+#@ }
+#@ 
+#@ 
+#@ ## Remaining SEVs are calculated the same whether running standalone or in Lynx
+#@ 
+#@ if { ![info exist SEV(dont_run)] }      { set SEV(dont_run) 0 }
+#@ if { ![info exist SEV(dont_exit)] }     { set SEV(dont_exit) 0 }
+#@ if { ![info exist SEV(analysis_task)] } { set SEV(analysis_task) 0 }
+#@ 
+#@ set SEV(tmp_dir) [pwd]
+#@ 
+#@ set SEV(workarea_dir)   [file dirname [file dirname [file dirname [file dirname [file dirname $SEV(tmp_dir)]]]]]
+#@ set SEV(techlib_name)   [file tail  [file dirname [file dirname [file dirname $SEV(tmp_dir)]]]]
+#@ 
+#@ set SEV(block_dir)      [file dirname [file dirname $SEV(tmp_dir)]]
+#@ set SEV(block_name)     [file tail $SEV(block_dir)]
+#@ set SEV(step_dir)       [file dirname $SEV(tmp_dir)]
+#@ set SEV(step)           [file tail $SEV(step_dir)]
+#@ set SEV(gscript_dir)    [file normalize $SEV(tmp_dir)/../../scripts_global]
+#@ set SEV(tscript_dir)    [file normalize $SEV(tmp_dir)/../../scripts_global/$SEV(techlib_name)]
+#@ set SEV(bscript_dir)    [file normalize $SEV(tmp_dir)/../../scripts_block]
+#@ set SEV(work_dir)       [file normalize $SEV(tmp_dir)/../work]
+#@ set SEV(src_dir)        [file normalize $SEV(tmp_dir)/../work/$SEV(src)]
+#@ set SEV(dst_dir)        [file normalize $SEV(tmp_dir)/../work/$SEV(dst)]
+#@ set SEV(log_dir)        [file normalize $SEV(tmp_dir)/../logs/$SEV(dst)]
+#@ set SEV(rpt_dir)        [file normalize $SEV(tmp_dir)/../rpts/$SEV(dst)]
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## The SVAR(design_name) must be undefined at this point in the script
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ set SVAR(design_name)  undefined
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## These SVAR(tag#) variables are a mechanism for grouping metrics. They are
+#@ ## not used by default but can be overridden in blck.tcl as shown below
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ set SVAR(tag01) [list name value]
+#@ set SVAR(tag02) [list name value]
+#@ set SVAR(tag03) [list name value]
+#@ set SVAR(tag04) [list name value]
+#@ set SVAR(tag05) [list name value]
+#@ set SVAR(tag06) [list name value]
+#@ set SVAR(tag07) [list name value]
+#@ set SVAR(tag08) [list name value]
+#@ set SVAR(tag09) [list name value]
+#@ set SVAR(tag10) [list name value]
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## The block.tcl file is normally empty but sourced here 
+#@ ## The most common use would be for overriding metric tags SVAR(tag#) listed above
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ if {[file exists ../../scripts_block/conf/block.tcl]} {
+#@   puts "RM-Info: sourcing ../../scripts_block/conf/block.tcl"
+#@   eval source $source_options ../../scripts_block/conf/block.tcl
+#@ }
+#@ 
+#@ if { [info exists env(LYNX_RTM_PRESENT)] } {
+#@ 
+#@   if { ![info exists SVAR(misc,early_complete_enable)] } { set SVAR(misc,early_complete_enable) 0 }
+#@ 
+#@   ## -----------------------------------------------------------------------------
+#@   ## Allow Lynx to overide Task Environment Variabls
+#@   ## -----------------------------------------------------------------------------
+#@ 
+#@   puts "RM-Info: Lynx is setting any TEV overrides from the RTM environment"
+#@   eval source $source_options $env(LYNX_VARFILE_TEV)
+#@ 
+#@ } else {
+#@   ## disable early_complete feature for all standalone execution
+#@   set SVAR(misc,early_complete_enable) 0
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## These Task variables that need to be assigned for proper standalone behavior but
+#@ ## that are controlled in the Lynx environment by the content of LYNX_VARFILE_TEV file
+#@ ## sourced below
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ set TEV(vx_enable) 0
+#@ set TEV(scenario) DEFAULT_SCENARIO
+#@ set TEV(report_level) NORMAL
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## These procedures/variables are not uniformly available
+#@ ## for all tools used in the flow. This section of code creates
+#@ ## the procedures/variables if they are not available.
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ if { ![info exists synopsys_root] } {
+#@ set synopsys_root "synopsys_root"
+#@ }
+#@ 
+#@ if { ![info exists synopsys_program_name] } {
+#@ set synopsys_program_name "tcl"
+#@ }
+#@ 
+#@ if { $synopsys_program_name == "tcl" } {
+#@ set sh_product_version [info patchlevel]
+#@ }
+#@ 
+#@ if { [info command parse_proc_arguments] != "parse_proc_arguments" } {
+#@ proc parse_proc_arguments { cmdSwitch procArgs optsRef } {
+#@ upvar $optsRef opts
+#@ if { $cmdSwitch == "-args" } {
+#@ foreach arg $procArgs {
+#@ if { [string index $arg 0] == "-" } {
+#@   set curArg $arg
+#@   set opts($curArg) 1
+#@ } else {
+#@   if { [info exists curArg] } {
+#@     set opts($curArg) $arg
+#@     unset curArg
+#@   } else {
+#@     puts "SNPS_ERROR: Found invalid argument: '$arg', with no preceding switch."
+#@     puts "SNPS_ERROR: Called from procedure: [lindex [info level -1] 0]"
+#@   }
+#@ }
+#@ }
+#@ }
+#@ }
+#@ }
+#@ 
+#@ if { [info command define_proc_attributes] != "define_proc_attributes" } {
+#@ proc define_proc_attributes args {}
+#@ }
+#@ 
+#@ if { [info command date] != "date" } {
+#@ proc date {} {
+#@ return [clock format [clock seconds] -format {%a %b %e %H:%M:%S %Y}]
+#@ }
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_script_stop: LCRM customized version
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_script_stop { args } {
+#@ 
+#@   global LYNX
+#@   global env SEV SVAR TEV
+#@   global sh_product_version
+#@   global synopsys_program_name
+#@ 
+#@   set options(-exit) 0
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   if {[info exists ::DESIGN_NAME]} {
+#@     ## LCRM generates the corrected SYS.BLOCK metric reflecting DESIGN_NAME
+#@     sproc_msg -info "METRIC | STRING SYS.BLOCK          | $::DESIGN_NAME"
+#@   }
+#@ 
+#@   ## -------------------------------------
+#@   ## Generate metrics for each of the TEV variables.
+#@   ## -------------------------------------
+#@ 
+#@   set generate_metrics_for_tev 0
+#@ 
+#@   if { $generate_metrics_for_tev } {
+#@ 
+#@     set name_list [lsort [array names TEV]]
+#@     foreach name $name_list {
+#@       set length [llength $TEV($name)]
+#@       if { $length == 0 } {
+#@         sproc_msg -info "METRIC | STRING TEV.$name | NULL_VALUE"
+#@       } else {
+#@         sproc_msg -info "METRIC | STRING TEV.$name | $TEV($name)"
+#@       }
+#@     }
+#@ 
+#@   }
+#@ 
+#@   ## -------------------------------------
+#@   ## Generate end-of-script metrics.
+#@   ## -------------------------------------
+#@ 
+#@   sproc_metric_time -stop
+#@   sproc_metric_system -end_of_script
+#@ 
+#@   ## -------------------------------------
+#@   ## Exit processing.
+#@   ## -------------------------------------
+#@ 
+#@   if { $LYNX(rtm_present) } {
+#@     if { $SEV(dont_exit) } {
+#@       ## User is requesting that no exit be performed.
+#@     } else {
+#@       ## Check to see if explicit exit is being requested.
+#@       if { $options(-exit) } {
+#@         if { $synopsys_program_name == "cdesigner" } {
+#@           exit -force 1
+#@         } else {
+#@           exit
+#@         }
+#@       }
+#@     }
+#@   } else {
+#@     if { $synopsys_program_name == "cdesigner" } {
+#@       exit -force 1
+#@     } else {
+#@       exit
+#@     }
+#@   }
+#@ 
+#@ }
+#@ 
+#@ define_proc_attributes sproc_script_stop \
+#@   -info "Standard procedure for ending a script." \
+#@   -define_args {
+#@   {-exit  "Perform an exit." "" boolean optional}
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_generate_metrics:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_generate_metrics {} {
+#@ 
+#@ sproc_pinfo -mode start
+#@ 
+#@ global env SEV SVAR TEV
+#@   global synopsys_program_name
+#@   global power_enable_analysis
+#@   global case_analysis_sequential_propagation
+#@   global DESIGN_NAME
+#@ 
+#@   file mkdir $SEV(rpt_dir)
+#@ 
+#@   switch $synopsys_program_name {
+#@     de_shell -
+#@     dc_shell {
+#@       source ../../scripts_block/lcrm_setup/metric_reports_dc.tcl
+#@       sproc_metric_design
+#@       sproc_metric_sta
+#@       sproc_metric_power
+#@     }
+#@     icc_shell {
+#@       source ../../scripts_block/lcrm_setup/metric_reports_icc.tcl
+#@       sproc_metric_design
+#@       sproc_metric_sta
+#@       sproc_metric_power
+#@     }
+#@     pt_shell {
+#@       set RPT(basename) $SEV(rpt_dir)/pt.$TEV(scenario)
+#@       source ../../scripts_block/lcrm_setup/metric_reports_pt.tcl
+#@       sproc_metric_sta
+#@       if { $power_enable_analysis } {
+#@         sproc_metric_power
+#@       }
+#@     }
+#@     tmax_tcl {
+#@       sproc_metric_atpg
+#@     }
+#@   }
+#@ 
+#@   sproc_pinfo -mode stop
+#@ 
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_script_start:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_script_start {} {
+#@ 
+#@   global LYNX
+#@   global env SEV SVAR TEV
+#@   global sh_product_version
+#@   global synopsys_program_name
+#@ 
+#@   sproc_metric_time -start
+#@   sproc_metric_system -start_of_script
+#@ 
+#@ }
+#@ 
+#@ define_proc_attributes sproc_script_start \
+#@   -info "Standard procedure for starting a script." \
+#@   -define_args {
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_msg:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_msg { args } {
+#@ 
+#@   ## Assigning default value of "bell" since that is never used.
+#@ 
+#@   set options(-info)    "\b"
+#@   set options(-warning) "\b"
+#@   set options(-error)   "\b"
+#@   set options(-setup)   "\b"
+#@   set options(-issue)   "\b"
+#@   set options(-header)  0
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   if       { $options(-info)   != "\b" } {
+#@     puts "SNPS_INFO   : $options(-info)"
+#@   } elseif { $options(-warning) != "\b" } {
+#@     puts "SNPS_WARNING: $options(-warning)"
+#@   } elseif { $options(-error)  != "\b" } {
+#@     puts "SNPS_ERROR  : $options(-error)"
+#@   } elseif { $options(-setup)  != "\b" } {
+#@     puts "SNPS_SETUP  : $options(-setup)"
+#@   } elseif { $options(-issue)  != "\b" } {
+#@     puts "SNPS_ISSUE  : $options(-issue)"
+#@   } elseif { $options(-header) } {
+#@     puts "SNPS_HEADER : ## ------------------------------------- "
+#@   } else {
+#@     puts "SNPS_ERROR  : Unrecognized arguments for sproc_msg : $args"
+#@   }
+#@ }
+#@ 
+#@ define_proc_attributes sproc_msg \
+#@   -info "Standard message printing procedure." \
+#@   -define_args {
+#@   {-info    "Info message"    AString string optional}
+#@   {-warning "Warning message" AString string optional}
+#@   {-error   "Error message"   AString string optional}
+#@   {-setup   "Setup message"   AString string optional}
+#@   {-issue   "Issue message"   AString string optional}
+#@   {-header  "Header flag"     ""      boolean optional}
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_pinfo:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_pinfo { args } {
+#@ 
+#@   set options(-mode) ""
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   set parent_level [expr [info level] - 1]
+#@   set parent_name [lindex [info level $parent_level] 0]
+#@   set parent_name [regsub {^::} $parent_name {}]
+#@ 
+#@   switch $options(-mode) {
+#@     start   { sproc_msg -info "PROC_START : $parent_name" }
+#@     stop    { sproc_msg -info "PROC_STOP  : $parent_name" }
+#@     default { sproc_msg -error "Invalid argument to sproc_pinfo" }
+#@   }
+#@ }
+#@ 
+#@ define_proc_attributes sproc_pinfo \
+#@   -info "Prints standard messages at procedure boundaries." \
+#@   -define_args {
+#@   {-mode "Specifies which message to print" AnOos one_of_string
+#@     {required value_help {values {start stop}}}
+#@   }
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_script_version:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_script_version {} {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   global LYNX
+#@   global env SEV SVAR TEV
+#@ 
+#@   ## Determine version of $SEV(script_file)
+#@ 
+#@   set version "Nam"
+#@ 
+#@   if { [file exists $SEV(script_file)] } {
+#@ 
+#@     set fid [open $SEV(script_file) r]
+#@ 
+#@     while { [gets $fid line] >= 0 } {
+#@ 
+#@       ## -------------------------------------
+#@       ## Perforce format example:
+#@       ## -------------------------------------
+#@ 
+#@       set re {^## HEADER \$Id: [\w\/\.]+#([\d]+)}
+#@ 
+#@       if { [regexp $re $line match version] } {
+#@         break
+#@       }
+#@ 
+#@       ## -------------------------------------
+#@       ## CVS format example:
+#@       ## -------------------------------------
+#@ 
+#@       set re {^## HEADER \$Id: [\w\/\.\,]+\s+([\d\.]+)}
+#@ 
+#@       if { [regexp $re $line match version] } {
+#@         break
+#@       }
+#@ 
+#@     }
+#@ 
+#@     close $fid
+#@   }
+#@ 
+#@   sproc_pinfo -mode stop
+#@   return $version
+#@ 
+#@ }
+#@ 
+#@ define_proc_attributes sproc_script_version \
+#@   -info "Used to determine the version of a script." \
+#@   -define_args {
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_metric_system:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_metric_system { args } {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   global env SEV SVAR TEV
+#@   global sh_product_version
+#@   global synopsys_program_name
+#@ 
+#@   set xxx1 [clock seconds]
+#@ 
+#@   set options(-start_of_script) 0
+#@   set options(-end_of_script) 0
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   if { $options(-start_of_script) } {
+#@ 
+#@     sproc_msg -info "METRIC | STRING SYS.TASK           | $SEV(task)"
+#@     sproc_msg -info "METRIC | STRING SYS.PROJECT_NAME   | $SEV(project_name)"
+#@     sproc_msg -info "METRIC | STRING SYS.PROJECT_DIR    | $SEV(project_dir)"
+#@     sproc_msg -info "METRIC | STRING SYS.TECHLIB_NAME   | $SEV(techlib_name)"
+#@     sproc_msg -info "METRIC | STRING SYS.TECHLIB_DIR    | $SEV(techlib_dir)"
+#@     sproc_msg -info "METRIC | STRING SYS.WORKAREA_DIR   | $SEV(workarea_dir)"
+#@     sproc_msg -info "METRIC | STRING SYS.BLOCK_DIR      | $SEV(block_dir)"
+#@     sproc_msg -info "METRIC | STRING SYS.USER           | [exec whoami]"
+#@     sproc_msg -info "METRIC | STRING SYS.BLOCK          | $SVAR(design_name)"
+#@     sproc_msg -info "METRIC | STRING SYS.STEP           | $SEV(step)"
+#@     sproc_msg -info "METRIC | STRING SYS.SRC            | $SEV(src)"
+#@     sproc_msg -info "METRIC | STRING SYS.DST            | $SEV(dst)"
+#@     sproc_msg -info "METRIC | STRING SYS.LOG            | [file normalize $SEV(log_file)]"
+#@     sproc_msg -info "METRIC | STRING SYS.SCRIPT_NAME    | [file normalize $SEV(script_file)]"
+#@     sproc_msg -info "METRIC | STRING SYS.SCRIPT_VERSION | [sproc_script_version]"
+#@ 
+#@     set script_type unknown
+#@     if { [regexp "/scripts_global/" $SEV(script_file)] } {
+#@       set script_type global
+#@     }
+#@     if { [regexp "/scripts_global/$SEV(techlib_name)/" $SEV(script_file)] } {
+#@       set script_type techlib
+#@     }
+#@     if { [regexp "/scripts_block/" $SEV(script_file)] } {
+#@       set script_type block
+#@     }
+#@     sproc_msg -info "METRIC | STRING SYS.SCRIPT_TYPE    | $script_type"
+#@ 
+#@     sproc_msg -info "METRIC | STRING SYS.MACHINE        | [exec uname -n]"
+#@     sproc_msg -info "METRIC | STRING SYS.TOOL_NAME      | $synopsys_program_name"
+#@ 
+#@     if { ![info exists sh_product_version] || $sh_product_version == "" } {
+#@       set sh_product_version NaM
+#@     }
+#@     sproc_msg -info "METRIC | STRING SYS.TOOL_VERSION   | $sh_product_version"
+#@ 
+#@     if { $SEV(dont_run) || $SEV(dont_exit) } {
+#@       if { $SEV(analysis_task) } {
+#@         sproc_msg -info "METRIC | STRING SYS.TASK_TYPE      | ANALYZE_INTERACTIVE"
+#@       } else {
+#@         sproc_msg -info "METRIC | STRING SYS.TASK_TYPE      | OPTIMIZE_INTERACTIVE"
+#@       }
+#@     } else {
+#@       if { $SEV(analysis_task) } {
+#@         sproc_msg -info "METRIC | STRING SYS.TASK_TYPE      | ANALYZE"
+#@       } else {
+#@         sproc_msg -info "METRIC | STRING SYS.TASK_TYPE      | OPTIMIZE"
+#@       }
+#@     }
+#@ 
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.01 | [lindex $SVAR(tag01) 0] !! [lindex $SVAR(tag01) 1]"
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.02 | [lindex $SVAR(tag02) 0] !! [lindex $SVAR(tag02) 1]"
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.03 | [lindex $SVAR(tag03) 0] !! [lindex $SVAR(tag03) 1]"
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.04 | [lindex $SVAR(tag04) 0] !! [lindex $SVAR(tag04) 1]"
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.05 | [lindex $SVAR(tag05) 0] !! [lindex $SVAR(tag05) 1]"
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.06 | [lindex $SVAR(tag06) 0] !! [lindex $SVAR(tag06) 1]"
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.07 | [lindex $SVAR(tag07) 0] !! [lindex $SVAR(tag07) 1]"
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.08 | [lindex $SVAR(tag08) 0] !! [lindex $SVAR(tag08) 1]"
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.09 | [lindex $SVAR(tag09) 0] !! [lindex $SVAR(tag09) 1]"
+#@     sproc_msg -info "METRIC | TAG SYS.TAG.10 | [lindex $SVAR(tag10) 0] !! [lindex $SVAR(tag10) 1]"
+#@ 
+#@   }
+#@ 
+#@   if { $options(-end_of_script) } {
+#@ 
+#@     if { ![info exists TEV(num_jobs)] }        { set TEV(num_jobs) 1 }
+#@     if { ![info exists TEV(num_cores)] }       { set TEV(num_cores) 1 }
+#@     if { ![info exists TEV(num_child_jobs)] }  { set TEV(num_child_jobs) 1 }
+#@     if { ![info exists TEV(num_child_cores)] } { set TEV(num_child_cores) 1 }
+#@ 
+#@     sproc_msg -info "METRIC | INTEGER INFO.NUM_JOBS        | $TEV(num_jobs)"
+#@     sproc_msg -info "METRIC | INTEGER INFO.NUM_CORES       | $TEV(num_cores)"
+#@     sproc_msg -info "METRIC | INTEGER INFO.NUM_CHILD_JOBS  | $TEV(num_child_jobs)"
+#@     sproc_msg -info "METRIC | INTEGER INFO.NUM_CHILD_CORES | $TEV(num_child_cores)"
+#@ 
+#@     if { [info exists env(LSB_JOBID)] } {
+#@       set lsf_job_id $env(LSB_JOBID)
+#@     } else {
+#@       set lsf_job_id NaM
+#@     }
+#@     sproc_msg -info "METRIC | STRING INFO.LSF_JOB_ID | $lsf_job_id"
+#@ 
+#@     switch $synopsys_program_name {
+#@       cdesigner -
+#@       tmax_tcl -
+#@       leda -
+#@       mvrc -
+#@       mvrc_shell -
+#@       tcl {
+#@         sproc_msg -info "METRIC | INTEGER INFO.MEMORY_USED | NaM"
+#@       }
+#@       pt_shell {
+#@         if { [info exists SEV(pt_dmsa_slave)] } {
+#@           ## -------------------------------------
+#@           ## If running DMSA, report the max memory across the master and slaves.
+#@           ## -------------------------------------
+#@           remote_execute { set slave_mem_kb [mem] }
+#@           get_distributed_variables { slave_mem_kb }
+#@           set mem_kb_list [mem]
+#@           foreach session [array names slave_mem_kb] {
+#@             lappend mem_kb_list $slave_mem_kb($session)
+#@           }
+#@           set mem_kb [lindex [lsort -integer -decreasing $mem_kb_list] 0]
+#@         } else {
+#@           set mem_kb [mem]
+#@         }
+#@         set mem_b [expr $mem_kb * pow(2,10)]
+#@         set mem_mb [expr int($mem_b / pow(2,20)) + 1]
+#@         sproc_msg -info "METRIC | INTEGER INFO.MEMORY_USED | [sproc_metric_format {%d} $mem_mb]"
+#@       }
+#@       de_shell -
+#@       dc_shell -
+#@       icc_shell {
+#@         set mem_kb [mem -all]
+#@         set mem_b [expr $mem_kb * pow(2,10)]
+#@         set mem_mb [expr int($mem_b / pow(2,20)) + 1]
+#@         sproc_msg -info "METRIC | INTEGER INFO.MEMORY_USED | [sproc_metric_format {%d} $mem_mb]"
+#@       }
+#@       default {
+#@         set mem_kb [mem]
+#@         set mem_b [expr $mem_kb * pow(2,10)]
+#@         set mem_mb [expr int($mem_b / pow(2,20)) + 1]
+#@         sproc_msg -info "METRIC | INTEGER INFO.MEMORY_USED | [sproc_metric_format {%d} $mem_mb]"
+#@       }
+#@     }
+#@ 
+#@     if { [info command list_licenses] == "list_licenses" } {
+#@       redirect -var report {
+#@         list_licenses
+#@       }
+#@       set license_list [list]
+#@       set lines [split $report "\n"]
+#@       foreach line $lines {
+#@         if { [regexp {^\s*$} $line] } {
+#@           continue
+#@         }
+#@         if { [regexp {^\s+[\w\-]+} $line] } {
+#@           lappend license_list [lindex $line 0]
+#@         }
+#@       }
+#@     } elseif { $synopsys_program_name == "tmax_tcl" } {
+#@       redirect -var report {
+#@         report_licenses
+#@       }
+#@       set license_list [list] 
+#@       set lines [split $report "\n"]
+#@       foreach line $lines {
+#@         if { [regexp {^\s*$} $line] } {
+#@           continue
+#@         } else {
+#@           lappend license_list [lindex $line 0]
+#@         }
+#@       }
+#@     } elseif { $synopsys_program_name == "custom_designer" } {
+#@       puts "## list CustomDesigner licenses checked out"
+#@       foreach f [db::getFeatures] { 
+#@         if { [db::queryFeature $f] } { puts $f } 
+#@       }
+#@       set license_list [list LicenseDataUnavailable]
+#@     } else {
+#@       set license_list [list LicenseDataUnavailable]
+#@     }
+#@ 
+#@     sproc_msg -info "METRIC | STRING INFO.LICENSES | $license_list"
+#@ 
+#@   }
+#@ 
+#@   set xxx2 [clock seconds]
+#@   set xxx [expr $xxx2 - $xxx1]
+#@   sproc_msg -info "METRICS sproc_metric_system took $xxx seconds"
+#@ 
+#@   sproc_pinfo -mode stop
+#@ }
+#@ 
+#@ define_proc_attributes sproc_metric_system \
+#@   -info "Used to generate metrics related to task execution." \
+#@   -define_args {
+#@   {-start_of_script "Indicates routine is being called at start of script execution." "" boolean optional}
+#@   {-end_of_script "Indicates routine is being called at end of script execution." "" boolean optional}
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_metric_time:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_metric_time { args } {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   global SEV
+#@   global SNPS_time_start SNPS_rpt_time_elapsed
+#@ 
+#@   set options(-start) 0
+#@   set options(-stop) 0
+#@ 
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   if { $options(-start) } {
+#@     ## This code for GMT support is not for this release.
+#@     ## set gmt_date [clock format [clock seconds] -format "%a %b %d %H:%M:%S %Y" -gmt 1]
+#@     ## set gmt_seconds [clock scan $gmt_date -gmt 1]
+#@     ## sproc_msg -info "METRIC | TIMESTAMP SYS.START_TIME  | $gmt_seconds"
+#@     sproc_msg -info "METRIC | TIMESTAMP SYS.START_TIME  | [clock seconds]"
+#@ 
+#@     sproc_msg -info "SYS.START_TIME | [date]"
+#@     set SNPS_time_start [clock seconds]
+#@   }
+#@   if { $options(-stop) } {
+#@     ## This code for GMT support is not for this release.
+#@     ## set gmt_date [clock format [clock seconds] -format "%a %b %d %H:%M:%S %Y" -gmt 1]
+#@     ## set gmt_seconds [clock scan $gmt_date -gmt 1]
+#@     ## sproc_msg -info "METRIC | TIMESTAMP SYS.STOP_TIME   | $gmt_seconds"
+#@     sproc_msg -info "METRIC | TIMESTAMP SYS.STOP_TIME   | [clock seconds]"
+#@ 
+#@     sproc_msg -info "SYS.STOP_TIME | [date]"
+#@     set SNPS_time_stop [clock seconds]
+#@     set SNPS_time_total_seconds [expr $SNPS_time_stop - $SNPS_time_start]
+#@     set dhms [sproc_metric_time_elapsed -start $SNPS_time_start -stop $SNPS_time_stop]
+#@     sproc_msg -info "METRIC | TIME INFO.ELAPSED_TIME.TOTAL | $SNPS_time_total_seconds"
+#@     sproc_msg -info "INFO.ELAPSED_TIME.TOTAL | $dhms"
+#@ 
+#@     ## this code generates "<>.ELAPSED_TIME.TOTAL - <>.ELAPSED_TIME.REPORT" if the metrics exist
+#@ if { 1 } {
+#@     if { [info exists SNPS_rpt_time_elapsed] } {
+#@       set SNPS_time_stop_minus_reports [expr $SNPS_time_stop - $SNPS_rpt_time_elapsed]
+#@       set SNPS_time_total_minus_reports_seconds [ expr $SNPS_time_stop_minus_reports - $SNPS_time_start]
+#@     set dhms [sproc_metric_time_elapsed -start $SNPS_time_start -stop $SNPS_time_stop_minus_reports]
+#@       sproc_msg -info "METRIC | TIME INFO.ELAPSED_TIME.TOTAL_MINUS_REPORT | $SNPS_time_total_minus_reports_seconds"
+#@       sproc_msg -info "INFO.ELAPSED_TIME.TOTAL_MINUS_REPORT | $dhms"
+#@     }
+#@ }
+#@ 
+#@   }
+#@ 
+#@   sproc_pinfo -mode stop
+#@ }
+#@ 
+#@ define_proc_attributes sproc_metric_time \
+#@   -info "Used to generate metrics related to duration of task execution." \
+#@   -define_args {
+#@   {-start "Indicates routine is being called to provide start time info.." "" boolean optional}
+#@   {-stop "Indicates routine is being called to provide stop time info." "" boolean optional}
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_metric_design:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_metric_design { args } {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   global env SEV SVAR TEV
+#@   global synopsys_program_name
+#@   global icc_standalone_reporting_flag
+#@ 
+#@   if { [regexp -nocase {NONE} $TEV(report_level)] || !$SEV(metrics_enable) } {
+#@     sproc_pinfo -mode stop
+#@     return
+#@   }
+#@ 
+#@   set xxx1 [clock seconds]
+#@ 
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   set area NaM
+#@   set cell_area NaM
+#@   set width NaM
+#@   set height NaM
+#@   set chip_area NaM
+#@   set chip_width NaM
+#@   set chip_height NaM
+#@   set utilization NaM
+#@   set wire_length NaM
+#@   set num_drc_errors NaM
+#@   set num_drc_error_types NaM
+#@   set num_instances NaM
+#@   set num_flipflops NaM
+#@   set num_modules NaM
+#@   set num_macros NaM
+#@   set num_ports NaM
+#@   set num_nets NaM
+#@   set num_pins NaM
+#@   set grc_overflow NaM
+#@   set vt_cells_list NaM
+#@   set vt_cell_count_list NaM
+#@   set vt_area_list NaM
+#@   set ldrc_total NaM
+#@   set ldrc_trans NaM
+#@   set ldrc_cap NaM
+#@ 
+#@   ## -------------------------------------
+#@   ## Design metrics extraction
+#@   ## -------------------------------------
+#@ 
+#@   switch $synopsys_program_name {
+#@ 
+#@     icc_shell {
+#@       set fname $SEV(rpt_dir)/icc.report_design_physical
+#@       if { ![file exists $fname] } {
+#@         if { $SEV(metrics_flag_errors) } {
+#@           sproc_msg -error   "sproc_metric_design: Unable to find file $fname for metric extraction."
+#@         } else {
+#@           sproc_msg -warning "sproc_metric_design: Unable to find file $fname for metric extraction."
+#@         }
+#@       } else {
+#@ 
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         while { [gets $fid line] >= 0 } {
+#@           lappend lines $line
+#@         }
+#@         close $fid
+#@ 
+#@         set ctl1 0
+#@         set ctl2 0
+#@         set ctl3 0
+#@         set ctl4 0
+#@         set ctl5 0
+#@         foreach line $lines {
+#@ 
+#@           if { ( $ctl3 == 0 ) && [ regexp {CHIP AND CORE INFORMATION} $line ] } {
+#@             set ctl3 1
+#@           } elseif { (( $ctl3 == 1 ) || ( $ctl3 == 2 )) && [ regexp {^Core\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)} $line matchVar width height area ] } {
+#@             incr ctl3
+#@           } elseif { (( $ctl3 == 1 ) || ( $ctl3 == 2 )) && [ regexp {^Chip\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)} $line matchVar chip_width chip_height chip_area ] } {
+#@             incr ctl3
+#@           } elseif { $ctl3 > 1 } {
+#@           }
+#@ 
+#@           regexp {Cell/Core Ratio\s+:\s+([\d\.]+)\%} \
+#@             $line matchVar utilization
+#@ 
+#@           regexp {TOTAL LEAF CELLS\s+([\d\.]+)} \
+#@             $line matchVar num_modules
+#@ 
+#@           regexp {Macro Cells\s+([\d\.]+)} \
+#@             $line matchVar num_macros
+#@ 
+#@           regexp {Flipflops\s+([\d\.]+)} \
+#@             $line matchVar num_flipflops
+#@ 
+#@           if { ( $ctl1 == 0 ) && [ regexp {NET INFORMATION} $line ] } {
+#@             set ctl1 1
+#@           } elseif { ( $ctl1 == 1 ) && [ regexp {^Total\s+([\d\.]+)} $line matchVar num_nets ] } {
+#@             set ctl1 2
+#@           } elseif { $ctl1 > 1 } {
+#@           }
+#@ 
+#@           if { ( $ctl2 == 0 ) && [ regexp {PORT and PIN INFORMATION} $line ] } {
+#@             set ctl2 1
+#@           } elseif { (( $ctl2 == 1 ) || ( $ctl2 == 2 )) && [ regexp {^Leaf\s+([\d\.]+)} $line matchVar num_pins ] } {
+#@             incr ctl2
+#@           } elseif { (( $ctl2 == 1 ) || ( $ctl2 == 2 )) && [ regexp {^Ports\s+([\d\.]+)} $line matchVar num_ports ] } {
+#@             incr ctl2
+#@           } elseif { $ctl2 > 2 } {
+#@           }
+#@ 
+#@           if { ( $ctl4 == 0 ) && [ regexp {Signal Wiring Statistics:} $line ] } {
+#@             set ctl4 1
+#@           } elseif { ( $ctl4 == 1 ) && [ regexp {Total Wire Length\(count\):\s+([\d\.]+)} $line matchVar wire_length ] } {
+#@             set ctl4 2
+#@           } elseif { $ctl4 > 1 } {
+#@           }
+#@ 
+#@           if { ( $ctl5 == 0 ) && [ regexp {DRC information:} $line ] } {
+#@             set ctl5 1
+#@             set num_drc_error_types 0
+#@           } elseif { ( $ctl5 == 1 ) && [ regexp {Total error number:\s+([\d\.]+)} $line matchVar num_drc_errors ] } {
+#@             set ctl5 2
+#@           } elseif { ( $ctl5 == 1 ) } {
+#@             incr num_drc_error_types 
+#@             if { [ regexp {\s+(.*):\s+([\d\.]+)} $line matchVar error_type error_cnt ] } {
+#@               sproc_msg -info   "DRC : count = $error_cnt type = \"$error_type\""
+#@             } else {
+#@               sproc_msg -error   "sproc_metric_design: failure to part DRC error types properly."
+#@             }
+#@           } elseif { $ctl5 > 1 } {
+#@           }
+#@ 
+#@         }
+#@       }
+#@       set fname $SEV(rpt_dir)/icc.report_qor
+#@       if { ![file exists $fname] } {
+#@         if { $SEV(metrics_flag_errors) } {
+#@           sproc_msg -error   "sproc_metric_design: Unable to find file $fname for metric extraction."
+#@         } else {
+#@           sproc_msg -warning "sproc_metric_design: Unable to find file $fname for metric extraction."
+#@         }
+#@       } else {
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         while { [gets $fid line] >= 0 } {
+#@           lappend lines $line
+#@         }
+#@         close $fid
+#@         foreach line $lines {
+#@           regexp {Cell Area:\s+([\d\.]+)} \
+#@             $line matchVar cell_area
+#@         }
+#@       }
+#@ 
+#@     }
+#@ 
+#@       de_shell -
+#@       dc_shell {
+#@       set fname $SEV(rpt_dir)/dc.report_qor
+#@       if { ![file exists $fname] } {
+#@         if { $SEV(metrics_flag_errors) } {
+#@           sproc_msg -error   "sproc_metric_design: Unable to find file $fname for metric extraction."
+#@         } else {
+#@           sproc_msg -warning "sproc_metric_design: Unable to find file $fname for metric extraction."
+#@         }
+#@       } else {
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         while { [gets $fid line] >= 0 } {
+#@           lappend lines $line
+#@         }
+#@         close $fid
+#@         foreach line $lines {
+#@           regexp {Leaf Cell Count:\s+([\d\.]+)} \
+#@             $line matchVar num_instances
+#@           regexp {Total Number of Nets:\s+([\d\.]+)} \
+#@             $line matchVar num_nets
+#@           regexp {Cell Area:\s+([\d\.]+)} \
+#@             $line matchVar cell_area
+#@         }
+#@         set num_ports [sizeof_collection [get_ports *]]
+#@         set instances [get_cells -hierarchical -filter "is_hierarchical==false"]
+#@         set instances [filter $instances "ref_name!=**logic_0**"]
+#@         set instances [filter $instances "ref_name!=**logic_1**"]
+#@         set num_pins [sizeof_collection [get_pins -of_objects $instances]]
+#@       }
+#@ 
+#@     }
+#@ 
+#@     default {
+#@       sproc_msg -error "sproc_metric_design: unrecognized tool name"
+#@     }
+#@ 
+#@   }
+#@ 
+#@   ## -------------------------------------
+#@   ## Congestion metric extraction
+#@   ## -------------------------------------
+#@ 
+#@   switch $synopsys_program_name {
+#@ 
+#@     dc_shell -
+#@     icc_shell {
+#@       if { $synopsys_program_name == "dc_shell" } {
+#@         set fname $SEV(rpt_dir)/dc.report_congestion
+#@       } else {
+#@         set fname $SEV(rpt_dir)/icc.report_congestion
+#@       }
+#@       if { [file exists $fname] } {
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         while { [gets $fid line] >= 0 } {
+#@           regexp {Both Dirs: Overflow.*\(([\d\.]+)%\)} $line matchVar grc_overflow
+#@         }
+#@         close $fid
+#@       }
+#@     }
+#@     de_shell {
+#@       ## NOP
+#@     }
+#@     default {
+#@       sproc_msg -error "sproc_metric_design: unrecognized tool name"
+#@     }
+#@   }
+#@ 
+#@   ## -------------------------------------
+#@   ## Vth metrics extraction
+#@   ## -------------------------------------
+#@ 
+#@   set vt_item_list [list]
+#@ 
+#@   switch $synopsys_program_name {
+#@ 
+#@     de_shell -
+#@     dc_shell -
+#@     icc_shell {
+#@       if { $synopsys_program_name == "dc_shell" || $synopsys_program_name == "de_shell" } {
+#@         set fname $SEV(rpt_dir)/dc.report_threshold_voltage_group
+#@       } else {
+#@         set fname $SEV(rpt_dir)/icc.report_threshold_voltage_group
+#@       }
+#@       if { ![file exists $fname] } {
+#@         if { $SEV(metrics_flag_errors) } {
+#@           sproc_msg -error   "sproc_metric_design: Unable to find file $fname for metric extraction."
+#@         } else {
+#@           sproc_msg -warning "sproc_metric_design: Unable to find file $fname for metric extraction."
+#@         }
+#@       } else {
+#@         set vt_cells_list ""
+#@         set vt_cell_count_list ""
+#@         set vt_area_list ""
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         while { [gets $fid line] >= 0 } {
+#@           lappend lines $line
+#@         }
+#@         close $fid
+#@         set mode 0
+#@         foreach line $lines {
+#@           if { ( $mode == 0 ) && [ regexp {Threshold Voltage Group Report} $line ] } {
+#@             set mode 1
+#@           } elseif { ( $mode == 1 ) && [ regexp {\*\*\*\*\*\*\*\*\*\*} $line ] } {
+#@             set mode 2
+#@           } elseif { ( $mode == 2 ) && [ regexp {\*\*\*\*\*\*\*\*\*\*} $line ] } {
+#@             set mode 3
+#@           } elseif { ( $mode == 3 ) && [ regexp {\*\*\*\*\*\*\*\*\*\*} $line ] } {
+#@             set mode 4
+#@           } elseif { ( $mode == 4 ) && [ regexp {\*\*\*\*\*\*\*\*\*\*} $line ] } {
+#@             set mode 5
+#@           } elseif { ( $mode == 2 ) } {
+#@             ## Parse for either current or pre-2010.03 format reports
+#@             if { [regexp {\s*([\w\.]+)\s+([\d\.]+)\s+\(([\d\.]+)%\)} \
+#@                           $line matchVar vt_name num_inst vt_percent] || \
+#@                  [regexp {\s*([\w\.]+)\s+([\d\.]+)\s+([\d\.]+)%} \
+#@                           $line matchVar vt_name num_inst vt_percent] } {
+#@               set vt_cells "$vt_name $vt_percent"
+#@               set vt_cell_count "$vt_name $num_inst"
+#@               lappend vt_cells_list $vt_cells
+#@               lappend vt_cell_count_list $vt_cell_count
+#@             }
+#@           } elseif { ( $mode == 4 ) } {
+#@             ## Parse for either current or pre-2010.03 format reports
+#@             if { [regexp {\s*([\w\.]+)\s+([\d\.]+)\s+\(([\d\.]+)%\)} \
+#@                          $line matchVar vt_name num_area vt_percent] || \
+#@                  [regexp {\s*([\w\.]+)\s+([\d\.]+)\s+([\d\.]+)%} \
+#@                          $line matchVar vt_name num_area vt_percent] } {
+#@               set vt_area "$vt_name $vt_percent"
+#@               lappend vt_area_list $vt_area
+#@             }
+#@           }
+#@         }
+#@       }
+#@     }
+#@ 
+#@     default {
+#@       sproc_msg -error "sproc_metric_design: unrecognized tool name"
+#@     }
+#@ 
+#@   }
+#@ 
+#@   switch $synopsys_program_name {
+#@     de_shell -
+#@     dc_shell {
+#@     }
+#@     icc_shell {
+#@       ##
+#@       ## These metrics are not currently being captured for dc_shell.
+#@       ## Set them to a value that will pass the error checking.
+#@       ##
+#@       set num_instances 0
+#@       if { [string is integer $num_modules] } {
+#@         set num_instances [expr $num_instances + $num_modules]
+#@       }
+#@       if { [string is integer $num_macros] } {
+#@         set num_instances [expr $num_instances + $num_macros]
+#@       }
+#@       if { $num_instances == 0 } {
+#@         set num_instances NaM
+#@       }
+#@     }
+#@   }
+#@ 
+#@   ## -------------------------------------
+#@   ## Logic DRC metric extraction
+#@   ## -------------------------------------
+#@ 
+#@   switch $synopsys_program_name {
+#@     de_shell -
+#@     dc_shell -
+#@     icc_shell {
+#@       if { $synopsys_program_name == "dc_shell" } {
+#@         set fname $SEV(rpt_dir)/dc.report_qor
+#@       } else {
+#@         set fname $SEV(rpt_dir)/icc.report_qor
+#@       }
+#@       if { [file exists $fname] } {
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         set mode 0
+#@         while { [gets $fid line] >= 0 } {
+#@           if { ( $mode == 0 ) && [ regexp {Design Rules} $line ] } {
+#@             set mode 1
+#@           } elseif { ( $mode == 1 ) && [ regexp {([-]+)} $line ] } {
+#@             set mode 2
+#@           } elseif { ( $mode == 2 ) && [ regexp {Total Number of Nets} $line ] } {
+#@             set mode 3
+#@           } elseif { ( $mode == 3 ) && [ regexp {([-]+)} $line ] } {
+#@             set mode 4
+#@           } elseif { ( $mode == 3 ) && [ regexp {Nets With Violations:\s+([\d]+)} $line matchVar ldrc_total ] } {
+#@             set ldrc_trans 0
+#@             set ldrc_cap 0
+#@           } elseif { ( $mode == 3 ) && [ regexp {Max Trans Violations:\s+([\d]+)} $line matchVar ldrc_trans ] } {
+#@           } elseif { ( $mode == 3 ) && [ regexp {Max Cap Violations:\s+([\d]+)} $line matchVar ldrc_cap ] } {
+#@           } else {
+#@           }
+#@         }
+#@         close $fid
+#@       }
+#@     }
+#@     default {
+#@       sproc_msg -error "sproc_metric_design: unrecognized tool name"
+#@     }
+#@   }
+#@ 
+#@   ## -------------------------------------
+#@   ## Perform a bit of error checking.
+#@   ## -------------------------------------
+#@ 
+#@   if { $area == "NaM" } {
+#@     if { $chip_area == "NaM" } {
+#@       sproc_msg -info "Missing metric: area"
+#@     } else {
+#@       sproc_msg -info "Metric: area resorting to chip_area, likely rectilinear."
+#@       set area $chip_area
+#@     }
+#@   }
+#@   if { $width == "NaM" } {
+#@     if { $chip_width == "NaM" } {
+#@       sproc_msg -info "Missing metric: width"
+#@     } else {
+#@       sproc_msg -info "Metric: width resorting to chip_width, likely rectilinear."
+#@       set width $chip_width
+#@     }
+#@   }
+#@   if { $height == "NaM" } {
+#@     if { $chip_height == "NaM" } {
+#@       sproc_msg -info "Missing metric: height"
+#@     } else {
+#@       sproc_msg -info "Metric: height resorting to chip_height, likely rectilinear."
+#@       set height $chip_height
+#@     }
+#@   }
+#@   if { $utilization   == "NaM" } { sproc_msg -info "Missing metric: utilization" }
+#@   if { $wire_length   == "NaM" } { sproc_msg -info "Missing metric: wire_length" }
+#@   if { $num_drc_errors    == "NaM" } { sproc_msg -info "Missing metric: num_drc_errors" }
+#@   if { $num_drc_error_types    == "NaM" } { sproc_msg -info "Missing metric: num_drc_error_types" }
+#@ 
+#@   if { $num_macros    == "NaM" } { sproc_msg -info "Missing metric: num_macros" }
+#@   if { $num_macros    == "NaM" } { sproc_msg -info "Missing metric: num_modules" }
+#@   if { $num_instances == "NaM" } { sproc_msg -info "Missing metric: num_instances" }
+#@   if { $num_flipflops == "NaM" } { sproc_msg -info "Missing metric: num_flipflops" }
+#@ 
+#@   if { $num_ports     == "NaM" } { sproc_msg -info "Missing metric: num_ports" }
+#@   if { $num_nets      == "NaM" } { sproc_msg -info "Missing metric: num_nets" }
+#@   if { $num_pins      == "NaM" } { sproc_msg -info "Missing metric: num_pins" }
+#@   if { $cell_area      == "NaM" } { sproc_msg -info "Missing metric: cell_area" }
+#@ 
+#@   sproc_msg -info "METRIC | DOUBLE  PHYSICAL.AREA | [sproc_metric_format {%f} $area]"
+#@   sproc_msg -info "METRIC | DOUBLE  PHYSICAL.WIDTH | [sproc_metric_format {%f} $width]"
+#@   sproc_msg -info "METRIC | DOUBLE  PHYSICAL.HEIGHT | [sproc_metric_format {%f} $height]"
+#@   sproc_msg -info "METRIC | PERCENT PHYSICAL.UTIL | $utilization"
+#@   sproc_msg -info "METRIC | DOUBLE  PHYSICAL.WLENGTH | [sproc_metric_format {%f} $wire_length]"
+#@   sproc_msg -info "METRIC | PERCENT PHYSICAL.CONGESTION | $grc_overflow"
+#@   sproc_msg -info "METRIC | INTEGER VERIFY.DRC.NUM_ERRORS | $num_drc_errors"
+#@   sproc_msg -info "METRIC | INTEGER VERIFY.DRC.NUM_TYPES | $num_drc_error_types"
+#@   sproc_msg -info "METRIC | STRING  VERIFY.DRC.TOOL | ICC"
+#@ 
+#@   sproc_msg -info "METRIC | DOUBLE  LOGICAL.CELL_AREA | [sproc_metric_format {%f} $cell_area]"
+#@   sproc_msg -info "METRIC | INTEGER LOGICAL.NUM_MACROS | $num_macros"
+#@   sproc_msg -info "METRIC | INTEGER LOGICAL.NUM_MODULES | $num_modules"
+#@   sproc_msg -info "METRIC | INTEGER LOGICAL.NUM_INSTS | $num_instances"
+#@   sproc_msg -info "METRIC | INTEGER LOGICAL.NUM_FLIPFLOPS | $num_flipflops"
+#@   sproc_msg -info "METRIC | INTEGER LOGICAL.NUM_PORTS | $num_ports"
+#@   sproc_msg -info "METRIC | INTEGER LOGICAL.NUM_NETS | $num_nets"
+#@   sproc_msg -info "METRIC | INTEGER LOGICAL.NUM_PINS | $num_pins"
+#@ 
+#@   if { $vt_cells_list == "NaM" || [llength $vt_cells_list] == 0 } { 
+#@     sproc_msg -info "Missing Vth metric information. (percent cells)" 
+#@     sproc_msg -info "METRIC | PERCENT PWR.VTH_PERCENT_CELLS.NO_VTH_INFO | NaM"
+#@   } else {
+#@     foreach vt_cells $vt_cells_list {
+#@       set vt_name    [lindex $vt_cells 0]
+#@       set vt_percent [lindex $vt_cells 1]
+#@       sproc_msg -info "METRIC | PERCENT PWR.VTH_PERCENT_CELLS.$vt_name | $vt_percent"
+#@     }
+#@   }
+#@ 
+#@   if { $vt_cell_count_list == "NaM" || [llength $vt_cell_count_list] == 0 } {
+#@     sproc_msg -info "Missing Vth metric information. (instance count)"
+#@     sproc_msg -info "METRIC | INTEGER PWR.VTH_NUM_INSTS.NO_VTH_INFO | NaM"
+#@   } else {
+#@     foreach vt_cell_count $vt_cell_count_list {
+#@       set vt_name    [lindex $vt_cell_count 0]
+#@       set vt_count [lindex $vt_cell_count 1]
+#@       sproc_msg -info "METRIC | INTEGER PWR.VTH_NUM_INSTS.$vt_name | $vt_count"
+#@     }
+#@   }
+#@ 
+#@   if { $vt_area_list == "NaM" || [llength $vt_area_list] == 0 } {
+#@     sproc_msg -info "Missing Vth metric information. (percent area)"
+#@     sproc_msg -info "METRIC | PERCENT PWR.VTH_PERCENT_AREA.NO_VTH_INFO | NaM"
+#@   } else {
+#@     foreach vt_area $vt_area_list {
+#@       set vt_name    [lindex $vt_area 0]
+#@       set vt_percent [lindex $vt_area 1]
+#@       sproc_msg -info "METRIC | PERCENT PWR.VTH_PERCENT_AREA.$vt_name | $vt_percent"
+#@     }
+#@   }
+#@ 
+#@   if { $ldrc_total == "NaM" } {
+#@     sproc_msg -info "Missing logical DRC metric information."
+#@     sproc_msg -info "METRIC | INTEGER STA.LDRC.TOTAL | NaM"
+#@   } else {
+#@     sproc_msg -info "METRIC | INTEGER STA.LOGICAL_DRC.TOTAL | $ldrc_total"
+#@     sproc_msg -info "METRIC | INTEGER STA.LOGICAL_DRC.TRANS | $ldrc_trans"
+#@     sproc_msg -info "METRIC | INTEGER STA.LOGICAL_DRC.CAP | $ldrc_cap"
+#@   }
+#@ 
+#@   set xxx2 [clock seconds]
+#@   set xxx [expr $xxx2 - $xxx1]
+#@   sproc_msg -info "METRICS sproc_metric_design took $xxx seconds"
+#@ 
+#@   sproc_pinfo -mode stop
+#@ }
+#@ 
+#@ define_proc_attributes sproc_metric_design \
+#@   -info "Gathers design information for metrics reporting." \
+#@   -define_args {
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_clean_string:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_clean_string { args } {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   set options(-string) ""
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   set string_before $options(-string)
+#@ 
+#@   set string_after [regsub -all {[\*]} $string_before {}]
+#@   set string_after [regsub -all {[\/\-\(\)\[\]\=\%\&\@\!\~]} $string_after {_}]
+#@ 
+#@   if {![regexp $string_after $string_before]} {
+#@     sproc_msg -warn "string $string_before changed to $string_after to remove hazardous characters"
+#@   }
+#@ 
+#@   sproc_pinfo -mode stop
+#@ 
+#@   return $string_after
+#@ 
+#@ }
+#@ 
+#@ define_proc_attributes sproc_clean_string \
+#@   -info "removes characters not supported for metric strings" \
+#@   -define_args {
+#@   {-string  "The string that needs cleaning." AString string required}
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_metric_sta:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_metric_sta { args } {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   global env SEV SVAR TEV
+#@   global synopsys_program_name
+#@   global pt_shell_mode
+#@   global icc_standalone_reporting_flag
+#@ 
+#@   if { [regexp -nocase {NONE} $TEV(report_level)] || !$SEV(metrics_enable) } {
+#@     sproc_pinfo -mode stop
+#@     return
+#@   }
+#@ 
+#@   set xxx1 [clock seconds]
+#@ 
+#@   set options(-scenario) ""
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   switch $synopsys_program_name {
+#@ 
+#@     pt_shell {
+#@ 
+#@       switch $pt_shell_mode {
+#@         primetime {
+#@           if { [llength $options(-scenario)] != 1  } {
+#@             sproc_msg -error "A single scenario must be specified."
+#@           } else {
+#@             set RPT(basename) $SEV(rpt_dir)/pt.$options(-scenario)
+#@           }
+#@         }
+#@         primetime_master {
+#@           if { [llength $options(-scenario)] != 1  } {
+#@             sproc_msg -error "A single scenario must be specified."
+#@           } else {
+#@             set RPT(basename) $SEV(rpt_dir)/pt.dmsa.$options(-scenario)
+#@           }
+#@         }
+#@         primetime_slave {
+#@           sproc_msg -error "This procedure not supported for primetime_slave"
+#@           sproc_pinfo -mode stop
+#@           return
+#@         }
+#@       }
+#@ 
+#@       ## -------------------------------------
+#@       ## Establishing units used in PT reports
+#@       ## -------------------------------------
+#@ 
+#@       set time_unit undefined
+#@ 
+#@       set fname $RPT(basename).report_units
+#@ 
+#@       if { ![file exists $fname] } {
+#@         if { $SEV(metrics_flag_errors) } {
+#@           sproc_msg -error   "sproc_metric_sta: Unable to find file $fname for metric extraction."
+#@         } else {
+#@           sproc_msg -warning "sproc_metric_sta: Unable to find file $fname for metric extraction."
+#@         }
+#@       } else {
+#@ 
+#@         set fid [open $fname r]
+#@         set string_file [read $fid]
+#@         close $fid
+#@         set lines [split $string_file \n]
+#@ 
+#@         foreach line $lines {
+#@           puts $line
+#@           if { [regexp {\s(\S+)\s+Second} $line match value] } {
+#@             switch $value {
+#@               1e-00 { set time_unit s }
+#@               1e-03 { set time_unit ms }
+#@               1e-06 { set time_unit us }
+#@               1e-09 { set time_unit ns }
+#@               1e-12 { set time_unit ps }
+#@               1e-15 { set time_unit fs }
+#@               default {
+#@                 sproc_msg -error "Time unit $value not recognized."
+#@               }
+#@             }
+#@           }
+#@         }
+#@ 
+#@       }
+#@ 
+#@       sproc_msg -info "PrimeTime time unit is $time_unit"
+#@ 
+#@       set fname $RPT(basename).report_qor
+#@ 
+#@       if { ![file exists $fname] } {
+#@         if { $SEV(metrics_flag_errors) } {
+#@           sproc_msg -error   "sproc_metric_sta: Unable to find file $fname for metric extraction."
+#@         } else {
+#@           sproc_msg -warning "sproc_metric_sta: Unable to find file $fname for metric extraction."
+#@         }
+#@       } else {
+#@ 
+#@         set fid [open $fname r]
+#@         set string_file [read $fid]
+#@         close $fid
+#@         set lines [split $string_file \n]
+#@ 
+#@         foreach line $lines {
+#@           if { [regexp {^\s+Timing Path Group\s+\'(.*)\'} $line matchVar group_name] } {
+#@             set group_name [regsub -all -- {\*} $group_name {}]
+#@             set group_name [regsub -all -- {[()-/]} $group_name {_}]
+#@           }
+#@           if { [regexp {^\s+Scenario\s+\'(.*)\'} $line matchVar scenario_name] } {
+#@             set scenario scenario_name
+#@           }
+#@ 
+#@           if { [regexp {^\s+Levels of Logic:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value $data
+#@             sproc_msg -info "METRIC | DOUBLE STA.LOGIC_LEVELS_MAX.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@ 
+#@           if { [regexp {^\s+Critical Path Slack:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value [sproc_metric_format {%f} [sproc_metric_normalize -value $data -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MAX.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@           if { [regexp {^\s+Worst Hold Violation:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value [sproc_metric_format {%f} [sproc_metric_normalize -value $data -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MIN.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@ 
+#@           if { [regexp {^\s+Total Negative Slack:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value [sproc_metric_format {%f} [sproc_metric_normalize -value $data -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MAX.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@           if { [regexp {^\s+Total Hold Violation:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value [sproc_metric_format {%f} [sproc_metric_normalize -value $data -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MIN.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@ 
+#@           if { [regexp {^\s+No. of Violating Paths:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set data [expr int($data)]
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MAX.[sproc_clean_string -string $group_name.$scenario] | $data"
+#@           }
+#@           if { [regexp {^\s+No. of Hold Violations:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set data [expr int($data)]
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MIN.[sproc_clean_string -string $group_name.$scenario] | $data"
+#@           }
+#@         }
+#@ 
+#@       }
+#@ 
+#@       ## -------------------------------------
+#@       ## Clock processing
+#@       ## -------------------------------------
+#@ 
+#@       set fname $RPT(basename).report_clock_timing
+#@       if { ![file exists $fname] } {
+#@         sproc_msg -info "Unable to generate clock metric unable to find file = \"$fname\"."
+#@       } else {
+#@ 
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         while { [gets $fid line] >= 0 } {
+#@           lappend lines $line
+#@         }
+#@         close $fid
+#@ 
+#@         set mode 0
+#@         set scenario $TEV(scenario)
+#@ 
+#@         foreach line $lines {
+#@ 
+#@           if { [regexp {^\s+Clock:\s+([\w]+)\s*$} $line matchVar clock_name] } {
+#@             set name [regsub -all {\/} $clock_name {_}]
+#@           }
+#@ 
+#@           if { [regexp {^\s+Maximum setup skew:\s*$} $line ] } {
+#@             set mode 1
+#@           } elseif { $mode == 1 } {
+#@             set mode 2
+#@           } elseif { $mode == 2 } {
+#@             regexp {\s*\S+\s+([\d\.\-]+)\s+} $line match skew
+#@             set mode 0
+#@             sproc_msg -info "$name : $skew"
+#@             set metric_value [sproc_metric_format {%f} [sproc_metric_normalize -value $skew -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.CLK_SKEW.[sproc_clean_string -string $name.$scenario] | $metric_value"
+#@           } elseif { [regexp {^\s+Maximum setup launch latency:\s*$} $line ]  } {
+#@             set mode 3
+#@           } elseif { $mode == 3 } {
+#@             regexp {\s*\S+\s+([\d\.\-]+)\s+} $line match latency
+#@             set mode 0
+#@             sproc_msg -info "$name : $latency"
+#@             set metric_value [sproc_metric_format {%f} [sproc_metric_normalize -value $latency -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.CLK_LATENCY_MAX.[sproc_clean_string -string $name.$scenario] | $metric_value"
+#@           } elseif { [regexp {^\s+Minimum setup capture latency:\s*$} $line ]  } {
+#@             set mode 4
+#@           } elseif { $mode == 4 } {
+#@             regexp {\s*\S+\s+([\d\.\-]+)\s+} $line match latency
+#@             set mode 0
+#@             sproc_msg -info "$name : $latency"
+#@             set metric_value [sproc_metric_format {%f} [sproc_metric_normalize -value $latency -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.CLK_LATENCY_MIN.[sproc_clean_string -string $name.$scenario] | $metric_value"
+#@           }
+#@         }
+#@ 
+#@       }
+#@ 
+#@     }
+#@ 
+#@     de_shell -
+#@     dc_shell -
+#@     icc_shell {
+#@ 
+#@       if { $synopsys_program_name == "icc_shell" } {
+#@         set fname "$SEV(rpt_dir)/icc.report_units"
+#@       } else {
+#@         set fname "$SEV(rpt_dir)/dc.report_units"
+#@       }
+#@       if { ![file exists $fname] } {
+#@ 
+#@         if { $SEV(metrics_flag_errors) } {
+#@           sproc_msg -error   "sproc_metric_sta: Unable to find file $fname for metric normalization."
+#@         } else {
+#@           sproc_msg -warning "sproc_metric_sta: Unable to find file $fname for metric normalization."
+#@         }
+#@ 
+#@       } else {
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         while { [gets $fid line] >= 0 } {
+#@           lappend lines $line
+#@         }
+#@         close $fid
+#@         set time_unit "undefined"
+#@         foreach line $lines {
+#@           if { [regexp "Time_unit.*\((.\s+)\)" $line matchVar time_unit] } {
+#@             sproc_msg -info "time_unit: $time_unit"
+#@             break
+#@           }
+#@         }
+#@ 
+#@         if { $time_unit == "undefined" } {
+#@           sproc_msg -issue "The report_units $fname report is returning a time unit of N/A."
+#@           set time_unit ns
+#@         }
+#@       }
+#@ 
+#@       if { $synopsys_program_name == "icc_shell" } {
+#@         set fname "$SEV(rpt_dir)/icc.report_qor"
+#@       } else {
+#@         set fname "$SEV(rpt_dir)/dc.report_qor"
+#@       }
+#@ 
+#@ 
+#@       if { ![file exists $fname] } {
+#@         if { $SEV(metrics_flag_errors) } {
+#@           sproc_msg -error   "sproc_metric_sta: Unable to find file $fname for metric extraction."
+#@         } else {
+#@           sproc_msg -warning "sproc_metric_sta: Unable to find file $fname for metric extraction."
+#@         }
+#@       } else {
+#@ 
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         while { [gets $fid line] >= 0 } {
+#@           lappend lines $line
+#@         }
+#@         close $fid
+#@ 
+#@         set group_name GROUP_NOT_SPECIFIED
+#@         set scenario SCENARIO_NOT_SPECIFIED
+#@         foreach line $lines {
+#@ 
+#@           if { [regexp {^\s+Timing Path Group\s+\'(.*)\'} $line matchVar group_name] } {
+#@             set group_name [regsub -all -- {\*} $group_name {}]
+#@             set group_name [regsub -all -- {[()-/]} $group_name {_}]
+#@           }
+#@           regexp {^\s+Scenario\s+\'(.*)\'} $line matchVar scenario
+#@ 
+#@           if { [regexp {^\s+Critical Path Slack:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value [sproc_metric_format {%f} [sproc_metric_normalize -value $data -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MAX.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@           if { [regexp {^\s+Total Negative Slack:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value [sproc_metric_format {%f} [sproc_metric_normalize -value $data -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MAX.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@           if { [regexp {^\s+No. of Violating Paths:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set data [expr int($data)]
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MAX.[sproc_clean_string -string $group_name.$scenario] | $data"
+#@           }
+#@           if { [regexp {^\s+Levels of Logic:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value $data
+#@             sproc_msg -info "METRIC | DOUBLE STA.LOGIC_LEVELS_MAX.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@           if { [regexp {^\s+Worst Hold Violation:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value [sproc_metric_format {%f} [sproc_metric_normalize -value $data -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MIN.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@           if { [regexp {^\s+Total Hold Violation:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set value [sproc_metric_format {%f} [sproc_metric_normalize -value $data -current_unit $time_unit]]
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MIN.[sproc_clean_string -string $group_name.$scenario] | $value"
+#@           }
+#@           if { [regexp {^\s+No. of Hold Violations:\s+([\-\d\.]+)} $line matchVar data] } {
+#@             set data [expr int($data)]
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MIN.[sproc_clean_string -string $group_name.$scenario] | $data"
+#@           }
+#@ 
+#@           ##
+#@           ## the next group of metrics comes from "report_qor -summary" for ICC
+#@           ##
+#@           if { [ regexp {^\s+Scenario:\s+([\w\.]+)\s+WNS:\s+([\d\.]+)\s+TNS:\s+([\d\.]+)\s+Number of Violating Paths:\s+([\d]+)} $line matchVar t_scenario t_wns t_tns t_nvp ] } {
+#@             set t_wns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_wns -current_unit $time_unit]] ]
+#@             set t_tns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_tns -current_unit $time_unit]] ]
+#@             set t_nvp [expr int($t_nvp)]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MAX.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_wns"
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MAX.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_tns"
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MAX.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_nvp"
+#@           }
+#@           if { [ regexp {^\s+Scenario:\s+([\w\.]+)\s+\(Hold\) WNS:\s+([\d\.]+)\s+TNS:\s+([\d\.]+)\s+Number of Violating Paths:\s+([\d]+)} $line matchVar t_scenario t_wns t_tns t_nvp ] } {
+#@             set t_wns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_wns -current_unit $time_unit]] ]
+#@             set t_tns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_tns -current_unit $time_unit]] ]
+#@             set t_nvp [expr int($t_nvp)]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MIN.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_wns"
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MIN.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_tns"
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MIN.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_nvp"
+#@           }
+#@           if { [ regexp {^\s+Multi-Scenario\s+WNS:\s+([\d\.]+)\s+TNS:\s+([\d\.]+)\s+Number of Violating Paths:\s+([\d]+)} $line matchVar t_wns t_tns t_nvp ] } {
+#@             set t_wns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_wns -current_unit $time_unit]] ]
+#@             set t_tns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_tns -current_unit $time_unit]] ]
+#@             set t_nvp [expr int($t_nvp)]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MAX.MULTI_SCENARIO | $t_wns"
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MAX.MULTI_SCENARIO | $t_tns"
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MAX.MULTI_SCENARIO | $t_nvp"
+#@           }
+#@           if { [ regexp {^\s+Multi-Scenario\s+\(Hold\)\s+WNS:\s+([\d\.]+)\s+TNS:\s+([\d\.]+)\s+Number of Violating Paths:\s+([\d]+)} $line matchVar t_wns t_tns t_nvp ] } {
+#@             set t_wns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_wns -current_unit $time_unit]] ]
+#@             set t_tns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_tns -current_unit $time_unit]] ]
+#@             set t_nvp [expr int($t_nvp)]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MIN.MULTI_SCENARIO | $t_wns"
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MIN.MULTI_SCENARIO | $t_tns"
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MIN.MULTI_SCENARIO | $t_nvp"
+#@           }
+#@ 
+#@           ##
+#@           ## the next group of metrics comes from "report_qor -summary" for ICC w/ "signoff_opt"
+#@           ##
+#@           if { [ regexp {^\s+Scenario:\s+([\w\.]+)\s+\(SETUP\)\s+WNS:\s+([\d\.]+)\s+TNS:\s+([\d\.]+)\s+Number of Violating Paths:\s+([\d]+)} $line matchVar t_scenario t_wns t_tns t_nvp ] } {
+#@             set t_wns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_wns -current_unit $time_unit]] ]
+#@             set t_tns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_tns -current_unit $time_unit]] ]
+#@             set t_nvp [expr int($t_nvp)]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MAX.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_wns"
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MAX.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_tns"
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MAX.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_nvp"
+#@           }
+#@           if { [ regexp {^\s+Scenario:\s+([\w\.]+)\s+\(HOLD\) WNS:\s+([\d\.]+)\s+TNS:\s+([\d\.]+)\s+Number of Violating Paths:\s+([\d]+)} $line matchVar t_scenario t_wns t_tns t_nvp ] } {
+#@             set t_wns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_wns -current_unit $time_unit]] ]
+#@             set t_tns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_tns -current_unit $time_unit]] ]
+#@             set t_nvp [expr int($t_nvp)]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MIN.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_wns"
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MIN.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_tns"
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MIN.SCENARIO.[sproc_clean_string -string $t_scenario] | $t_nvp"
+#@           }
+#@           if { [ regexp {^\s+Multi-Scenario\s+\(SETUP\)\s+WNS:\s+([\d\.]+)\s+TNS:\s+([\d\.]+)\s+Number of Violating Paths:\s+([\d]+)} $line matchVar t_wns t_tns t_nvp ] } {
+#@             set t_wns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_wns -current_unit $time_unit]] ]
+#@             set t_tns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_tns -current_unit $time_unit]] ]
+#@             set t_nvp [expr int($t_nvp)]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MAX.MULTI_SCENARIO | $t_wns"
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MAX.MULTI_SCENARIO | $t_tns"
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MAX.MULTI_SCENARIO | $t_nvp"
+#@           }
+#@           if { [ regexp {^\s+Multi-Scenario\s+\(HOLD\)\s+WNS:\s+([\d\.]+)\s+TNS:\s+([\d\.]+)\s+Number of Violating Paths:\s+([\d]+)} $line matchVar t_wns t_tns t_nvp ] } {
+#@             set t_wns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_wns -current_unit $time_unit]] ]
+#@             set t_tns [ expr -1.0 * [sproc_metric_format {%f} [sproc_metric_normalize -value $t_tns -current_unit $time_unit]] ]
+#@             set t_nvp [expr int($t_nvp)]
+#@             sproc_msg -info "METRIC | DOUBLE STA.WNS_MIN.MULTI_SCENARIO | $t_wns"
+#@             sproc_msg -info "METRIC | DOUBLE STA.TNS_MIN.MULTI_SCENARIO | $t_tns"
+#@             sproc_msg -info "METRIC | INTEGER STA.NVP_MIN.MULTI_SCENARIO | $t_nvp"
+#@           }
+#@ 
+#@         }
+#@       }
+#@ 
+#@       ## 
+#@       ## metrics relating to clock skew and latency
+#@       ##
+#@ 
+#@       if { $synopsys_program_name == "icc_shell" } {
+#@         set fname "$SEV(rpt_dir)/icc.cts.report_clock_timing"
+#@         if { ![file exists $fname] } {
+#@           sproc_msg -info "Unable to generate clock metric unable to find file = \"$fname\"."
+#@         } else {
+#@ 
+#@           set fid [open $fname r]
+#@           set lines [list]
+#@           while { [gets $fid line] >= 0 } {
+#@             lappend lines $line
+#@           }
+#@           close $fid
+#@ 
+#@           set mode 0
+#@           set scenario SCENARIO_NOT_SPECIFIED
+#@ 
+#@           foreach line $lines {
+#@ 
+#@             regexp {^Scenario\(s\):\s+(\w.*)} $line one scenario
+#@ 
+#@             if { [regexp {^\s+Clock:\s+([\w]+)\s*$} $line matchVar clock_name] } {
+#@               set name [regsub -all {\/} $clock_name {_}]
+#@             }
+#@ 
+#@             if { [regexp {^\s+Maximum setup skew:\s*$} $line ] } {
+#@               set mode 1
+#@             } elseif { $mode == 1 } {
+#@               set mode 2
+#@             } elseif { $mode == 2 } {
+#@               regexp {\s*\S+\s+([\d\.\-]+)\s+} $line match skew
+#@               set mode 0
+#@               sproc_msg -info "$name : $skew"
+#@               set metric_value [sproc_metric_format {%f} [sproc_metric_normalize -value $skew -current_unit $time_unit]]
+#@               sproc_msg -info "METRIC | DOUBLE STA.CLK_SKEW.[sproc_clean_string -string $name.$scenario] | $metric_value"
+#@             } elseif { [regexp {^\s+Maximum setup launch latency:\s*$} $line ]  } {
+#@               set mode 3
+#@             } elseif { $mode == 3 } {
+#@               regexp {\s*\S+\s+([\d\.\-]+)\s+} $line match latency
+#@               set mode 0
+#@               sproc_msg -info "$name : $latency"
+#@               set metric_value [sproc_metric_format {%f} [sproc_metric_normalize -value $latency -current_unit $time_unit]]
+#@               sproc_msg -info "METRIC | DOUBLE STA.CLK_LATENCY_MAX.[sproc_clean_string -string $name.$scenario] | $metric_value"
+#@             } elseif { [regexp {^\s+Minimum setup capture latency:\s*$} $line ]  } {
+#@               set mode 4
+#@             } elseif { $mode == 4 } {
+#@               regexp {\s*\S+\s+([\d\.\-]+)\s+} $line match latency
+#@               set mode 0
+#@               sproc_msg -info "$name : $latency"
+#@               set metric_value [sproc_metric_format {%f} [sproc_metric_normalize -value $latency -current_unit $time_unit]]
+#@               sproc_msg -info "METRIC | DOUBLE STA.CLK_LATENCY_MIN.[sproc_clean_string -string $name.$scenario] | $metric_value"
+#@             }
+#@           }
+#@ 
+#@         }
+#@       }
+#@ 
+#@     }
+#@ 
+#@     default {
+#@       sproc_msg -warning "sproc_metric_sta: unrecognized tool name"
+#@     }
+#@ 
+#@   }
+#@ 
+#@   set xxx2 [clock seconds]
+#@   set xxx [expr $xxx2 - $xxx1]
+#@   sproc_msg -info "METRICS sproc_metric_sta took $xxx seconds"
+#@ 
+#@   sproc_pinfo -mode stop
+#@ }
+#@ 
+#@ define_proc_attributes sproc_metric_sta \
+#@   -info "Gathers timing information for metrics reporting." \
+#@  -define_args {\
+#@   {-scenario "The PT scenario to process." AString string optional}
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_metric_power:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_metric_power { args } {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   global env SEV SVAR TEV
+#@   global synopsys_program_name
+#@   global icc_standalone_reporting_flag
+#@ 
+#@   if { [regexp -nocase {NONE} $TEV(report_level)] || !$SEV(metrics_enable) } {
+#@     sproc_pinfo -mode stop
+#@     return
+#@   }
+#@ 
+#@   set xxx1 [clock seconds]
+#@ 
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   switch $synopsys_program_name {
+#@ 
+#@     pt_shell {
+#@ 
+#@       ## -------------------------------------
+#@       ## Establishing info on units used in PT reports
+#@       ## -------------------------------------
+#@ 
+#@       ## -------------------------------------
+#@       ## parse report_unit which has this form
+#@       ## -------------------------------------
+#@       ##     Voltage Units = 1 V
+#@       ##     Capacitance Units = 1 pf
+#@       ##     Time Units = 1 ns
+#@       ##     Dynamic Power Units = 1 W
+#@       ##     Leakage Power Units = 1 W
+#@       ## -------------------------------------
+#@ 
+#@       set power_unit "undefined"
+#@       set time_unit "undefined"
+#@       set area_unit "undefined"
+#@ 
+#@       redirect -var report {
+#@         report_power -verbose
+#@       }
+#@ 
+#@       set lines [split $report "\n"]
+#@       foreach line $lines {
+#@         scan $line " Time Units = %f %s" timescale time_unit
+#@         scan $line " Leakage Power Units = %f %s" leakscale leak_units
+#@         scan $line " Dynamic Power Units = %f %s" dynscale dyn_units
+#@       }
+#@ 
+#@       sproc_msg -info "PrimeTime reports using $time_unit for time, $leak_units for leakage, $dyn_units for dynamic"
+#@ 
+#@       ## -------------------------------------
+#@       ## DESIGN
+#@       ## -------------------------------------
+#@ 
+#@       set cell [current_design]
+#@ 
+#@       set total_power        [get_attribute -quiet $cell total_power]
+#@       set dynamic_power      [get_attribute -quiet $cell dynamic_power]
+#@       set leakage_power      [get_attribute -quiet $cell leakage_power]
+#@       set switching_power    [get_attribute -quiet $cell switching_power]
+#@       set internal_power     [get_attribute -quiet $cell internal_power]
+#@       set x_transition_power [get_attribute -quiet $cell x_transition_power]
+#@       set glitch_power       [get_attribute -quiet $cell glitch_power]
+#@ 
+#@       if { [llength $total_power]        == 0 } { set total_power NaM }
+#@       if { [llength $dynamic_power]      == 0 } { set dynamic_power NaM }
+#@       if { [llength $leakage_power]      == 0 } { set leakage_power NaM }
+#@       if { [llength $switching_power]    == 0 } { set switching_power NaM }
+#@       if { [llength $internal_power]     == 0 } { set internal_power NaM }
+#@       if { [llength $x_transition_power] == 0 } { set x_transition_power NaM }
+#@       if { [llength $glitch_power]       == 0 } { set glitch_power NaM }
+#@ 
+#@       sproc_msg -info "METRIC | DOUBLE PWR.TOTAL.DESIGN.[sproc_clean_string -string $TEV(scenario)]     | [sproc_metric_format {%f} [sproc_metric_normalize -value $total_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.DYNAMIC.DESIGN.[sproc_clean_string -string $TEV(scenario)]   | [sproc_metric_format {%f} [sproc_metric_normalize -value $dynamic_power -current_unit $dyn_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.LEAKAGE.DESIGN.[sproc_clean_string -string $TEV(scenario)]   | [sproc_metric_format {%f} [sproc_metric_normalize -value $leakage_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.SWITCHING.DESIGN.[sproc_clean_string -string $TEV(scenario)] | [sproc_metric_format {%f} [sproc_metric_normalize -value $switching_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.INTERNAL.DESIGN.[sproc_clean_string -string $TEV(scenario)]  | [sproc_metric_format {%f} [sproc_metric_normalize -value $internal_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.XTRAN.DESIGN.[sproc_clean_string -string $TEV(scenario)]     | [sproc_metric_format {%f} [sproc_metric_normalize -value $x_transition_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.GLITCH.DESIGN.[sproc_clean_string -string $TEV(scenario)]    | [sproc_metric_format {%f} [sproc_metric_normalize -value $glitch_power -current_unit $leak_units]]"
+#@ 
+#@       ## -------------------------------------
+#@       ## Memory
+#@       ## -------------------------------------
+#@ 
+#@       set cells_all [get_cells -hierarchical -quiet * -filter "is_hierarchical == false"]
+#@       set cells_to_measure [filter_collection $cells_all "is_memory_cell == true"]
+#@ 
+#@       set invalid(total_power)        0
+#@       set invalid(dynamic_power)      0
+#@       set invalid(leakage_power)      0
+#@       set invalid(switching_power)    0
+#@       set invalid(internal_power)     0
+#@       set invalid(x_transition_power) 0
+#@       set invalid(glitch_power)       0
+#@ 
+#@       set total_power        0
+#@       set dynamic_power      0
+#@       set leakage_power      0
+#@       set switching_power    0
+#@       set internal_power     0
+#@       set x_transition_power 0
+#@       set glitch_power       0
+#@ 
+#@       foreach_in_collection cell $cells_to_measure {
+#@         set inc_total_power        [get_attribute -quiet $cell total_power]
+#@         set inc_dynamic_power      [get_attribute -quiet $cell dynamic_power]
+#@         set inc_leakage_power      [get_attribute -quiet $cell leakage_power]
+#@         set inc_switching_power    [get_attribute -quiet $cell switching_power]
+#@         set inc_internal_power     [get_attribute -quiet $cell internal_power]
+#@         set inc_x_transition_power [get_attribute -quiet $cell x_transition_power]
+#@         set inc_glitch_power       [get_attribute -quiet $cell glitch_power]
+#@ 
+#@         if { [llength $inc_total_power]        == 0 } {
+#@           set invalid(total_power) 1
+#@         } else {
+#@           set total_power        [expr $total_power        + $inc_total_power]
+#@         }
+#@         if { [llength $inc_dynamic_power]      == 0 } {
+#@           set invalid(dynamic_power) 1
+#@         } else {
+#@           set dynamic_power      [expr $dynamic_power      + $inc_dynamic_power]
+#@         }
+#@         if { [llength $inc_leakage_power]      == 0 } {
+#@           set invalid(leakage_power) 1
+#@         } else {
+#@           set leakage_power      [expr $leakage_power      + $inc_leakage_power]
+#@         }
+#@         if { [llength $inc_switching_power]    == 0 } {
+#@           set invalid(switching_power) 1
+#@         } else {
+#@           set switching_power    [expr $switching_power    + $inc_switching_power]
+#@         }
+#@         if { [llength $inc_internal_power]     == 0 } {
+#@           set invalid(internal_power) 1
+#@         } else {
+#@           set internal_power     [expr $internal_power     + $inc_internal_power]
+#@         }
+#@         if { [llength $inc_x_transition_power] == 0 } {
+#@           set invalid(x_transition_power) 1
+#@         } else {
+#@           set x_transition_power [expr $x_transition_power + $inc_x_transition_power]
+#@         }
+#@         if { [llength $inc_glitch_power]       == 0 } {
+#@           set invalid(glitch_power) 1
+#@         } else {
+#@           set glitch_power       [expr $glitch_power       + $inc_glitch_power]
+#@         }
+#@       }
+#@ 
+#@       sproc_msg -info "METRIC | DOUBLE PWR.TOTAL.MEM.[sproc_clean_string -string $TEV(scenario)]     | [sproc_metric_format {%f} [sproc_metric_normalize -value $total_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.DYNAMIC.MEM.[sproc_clean_string -string $TEV(scenario)]   | [sproc_metric_format {%f} [sproc_metric_normalize -value $dynamic_power -current_unit $dyn_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.LEAKAGE.MEM.[sproc_clean_string -string $TEV(scenario)]   | [sproc_metric_format {%f} [sproc_metric_normalize -value $leakage_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.SWITCHING.MEM.[sproc_clean_string -string $TEV(scenario)] | [sproc_metric_format {%f} [sproc_metric_normalize -value $switching_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.INTERNAL.MEM.[sproc_clean_string -string $TEV(scenario)]  | [sproc_metric_format {%f} [sproc_metric_normalize -value $internal_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.XTRAN.MEM.[sproc_clean_string -string $TEV(scenario)]     | [sproc_metric_format {%f} [sproc_metric_normalize -value $x_transition_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.GLITCH.MEM.[sproc_clean_string -string $TEV(scenario)]    | [sproc_metric_format {%f} [sproc_metric_normalize -value $glitch_power -current_unit $leak_units]]"
+#@ 
+#@       ## -------------------------------------
+#@       ## Clock tree
+#@       ## -------------------------------------
+#@ 
+#@       set cells_to_measure [get_clock_network_objects -type cell -include_clock_gating_network]
+#@ 
+#@       set invalid(total_power)        0
+#@       set invalid(dynamic_power)      0
+#@       set invalid(leakage_power)      0
+#@       set invalid(switching_power)    0
+#@       set invalid(internal_power)     0
+#@       set invalid(x_transition_power) 0
+#@       set invalid(glitch_power)       0
+#@ 
+#@       set total_power        0
+#@       set dynamic_power      0
+#@       set leakage_power      0
+#@       set switching_power    0
+#@       set internal_power     0
+#@       set x_transition_power 0
+#@       set glitch_power       0
+#@ 
+#@       foreach_in_collection cell $cells_to_measure {
+#@         set inc_total_power        [get_attribute -quiet $cell total_power]
+#@         set inc_dynamic_power      [get_attribute -quiet $cell dynamic_power]
+#@         set inc_leakage_power      [get_attribute -quiet $cell leakage_power]
+#@         set inc_switching_power    [get_attribute -quiet $cell switching_power]
+#@         set inc_internal_power     [get_attribute -quiet $cell internal_power]
+#@         set inc_x_transition_power [get_attribute -quiet $cell x_transition_power]
+#@         set inc_glitch_power       [get_attribute -quiet $cell glitch_power]
+#@ 
+#@         if { [llength $inc_total_power]        == 0 } {
+#@           set invalid(total_power) 1
+#@         } else {
+#@           set total_power        [expr $total_power        + $inc_total_power]
+#@         }
+#@         if { [llength $inc_dynamic_power]      == 0 } {
+#@           set invalid(dynamic_power) 1
+#@         } else {
+#@           set dynamic_power      [expr $dynamic_power      + $inc_dynamic_power]
+#@         }
+#@         if { [llength $inc_leakage_power]      == 0 } {
+#@           set invalid(leakage_power) 1
+#@         } else {
+#@           set leakage_power      [expr $leakage_power      + $inc_leakage_power]
+#@         }
+#@         if { [llength $inc_switching_power]    == 0 } {
+#@           set invalid(switching_power) 1
+#@         } else {
+#@           set switching_power    [expr $switching_power    + $inc_switching_power]
+#@         }
+#@         if { [llength $inc_internal_power]     == 0 } {
+#@           set invalid(internal_power) 1
+#@         } else {
+#@           set internal_power     [expr $internal_power     + $inc_internal_power]
+#@         }
+#@         if { [llength $inc_x_transition_power] == 0 } {
+#@           set invalid(x_transition_power) 1
+#@         } else {
+#@           set x_transition_power [expr $x_transition_power + $inc_x_transition_power]
+#@         }
+#@         if { [llength $inc_glitch_power]       == 0 } {
+#@           set invalid(glitch_power) 1
+#@         } else {
+#@           set glitch_power       [expr $glitch_power       + $inc_glitch_power]
+#@         }
+#@       }
+#@ 
+#@       sproc_msg -info "METRIC | DOUBLE PWR.TOTAL.CLK.[sproc_clean_string -string $TEV(scenario)]     | [sproc_metric_format {%f} [sproc_metric_normalize -value $total_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.DYNAMIC.CLK.[sproc_clean_string -string $TEV(scenario)]   | [sproc_metric_format {%f} [sproc_metric_normalize -value $dynamic_power -current_unit $dyn_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.LEAKAGE.CLK.[sproc_clean_string -string $TEV(scenario)]   | [sproc_metric_format {%f} [sproc_metric_normalize -value $leakage_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.SWITCHING.CLK.[sproc_clean_string -string $TEV(scenario)] | [sproc_metric_format {%f} [sproc_metric_normalize -value $switching_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.INTERNAL.CLK.[sproc_clean_string -string $TEV(scenario)]  | [sproc_metric_format {%f} [sproc_metric_normalize -value $internal_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.XTRAN.CLK.[sproc_clean_string -string $TEV(scenario)]     | [sproc_metric_format {%f} [sproc_metric_normalize -value $x_transition_power -current_unit $leak_units]]"
+#@       sproc_msg -info "METRIC | DOUBLE PWR.GLITCH.CLK.[sproc_clean_string -string $TEV(scenario)]    | [sproc_metric_format {%f} [sproc_metric_normalize -value $glitch_power -current_unit $leak_units]]"
+#@     }
+#@ 
+#@     de_shell -
+#@     dc_shell -
+#@     icc_shell {
+#@ 
+#@       if { $synopsys_program_name == "icc_shell" } {
+#@         set fname "$SEV(rpt_dir)/icc.report_power"
+#@       } else {
+#@         set fname "$SEV(rpt_dir)/dc.report_power"
+#@       }
+#@       if { ![file exists $fname] } {
+#@         if { $SEV(metrics_flag_errors) } {
+#@           sproc_msg -error   "sproc_metric_power: Unable to find file $fname for metric extraction."
+#@         } else {
+#@           sproc_msg -warning "sproc_metric_power: Unable to find file $fname for metric extraction."
+#@         }
+#@       } else {
+#@ 
+#@         set fid [open $fname r]
+#@         set lines [list]
+#@         while { [gets $fid line] >= 0 } {
+#@           lappend lines $line
+#@         }
+#@         close $fid
+#@ 
+#@         set dyn_power MISSING
+#@         set dyn_units MISSING
+#@         set leak_power MISSING
+#@         set leak_units MISSING
+#@         set scenario SCENARIO_NOT_SPECIFIED
+#@ 
+#@         foreach line $lines {
+#@           regexp {Scenario.s.: (.*)} $line matchVar scenario
+#@           regexp {Total Dynamic Power\s+=\s+([\-\d\.]+)\s+(\w+)} $line matchVar dyn_power dyn_units
+#@           regexp {Cell Leakage Power\s+=\s+([\-\d\.]+)\s+(\w+)} $line matchVar leak_power leak_units
+#@ 
+#@           ## DC report parsing reflected in these expressions
+#@           regexp {Internal\s+Switching\s+Power\s+\((.*)\)\s+Leakage} $line matchVar dyn_units
+#@           regexp {Cell\s+Power\s+\(.*\)\s+Power\s+\(.*\)\s+\(.*\)\s+Power\s+\((.+)\)\s*} $line matchVar leak_units
+#@           regexp {Netlist Power\s+([\-\d\.\+e]+)\s+([\-\d\.\+e]+)\s+([\-\d\.\+e]+)\s+\(([\-\d\.]+).\)\s+([\-\d\.\+e]+)} $line matchVar \
+#@             int_power     net_power     dyn_power dynamic_percent_power leak_power
+#@           ## These strings identify the trailing end of a report package
+#@           if {[regexp {Estimated Clock Tree} $line] || [regexp {Cell Leakage Power} $line] } {
+#@             sproc_msg -info "METRIC | DOUBLE PWR.DYNAMIC.DESIGN.[sproc_clean_string -string $scenario] | [sproc_metric_format {%f} [sproc_metric_normalize -value $dyn_power -current_unit $dyn_units]]"
+#@             sproc_msg -info "METRIC | DOUBLE PWR.LEAKAGE.DESIGN.[sproc_clean_string -string $scenario] | [sproc_metric_format {%f} [sproc_metric_normalize -value $leak_power -current_unit $leak_units]]"
+#@           }
+#@         }
+#@       }
+#@     }
+#@ 
+#@     default {
+#@       sproc_msg -warning "sproc_metric_power: unrecognized tool name"
+#@     }
+#@ 
+#@   }
+#@ 
+#@   set xxx2 [clock seconds]
+#@   set xxx [expr $xxx2 - $xxx1]
+#@   sproc_msg -info "METRICS sproc_metric_power took $xxx seconds"
+#@ 
+#@   sproc_pinfo -mode stop
+#@ }
+#@ 
+#@ define_proc_attributes sproc_metric_power \
+#@   -info "Gathers power information for metrics reporting." \
+#@   -define_args {
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_metric_normalize:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_metric_normalize { args } {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   ## table contains the multiplier for converting from supplied unit to normalized default
+#@   set default_power_unit mw
+#@   set normalize_lut(w)    1e+3
+#@   set normalize_lut(mw)   1e+0
+#@   set normalize_lut(uw)   1e-3
+#@   set normalize_lut(nw)   1e-6
+#@   set normalize_lut(pw)   1e-9
+#@ 
+#@   set default_time_unit ps
+#@   set normalize_lut(s)    1e+12
+#@   set normalize_lut(ns)   1e+3
+#@   set normalize_lut(ps)   1e+0
+#@ 
+#@   set default_area_unit um
+#@   set normalize_lut(nm)   1e-3
+#@   set normalize_lut(um)   1e+0
+#@   set normalize_lut(m)    1e+6
+#@ 
+#@   set options(-value) ""
+#@   set options(-current_unit) ""
+#@ 
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   set val $options(-value)
+#@ 
+#@   if { $val=="NaM" } {
+#@     sproc_msg -info "Passing through special case value $val"
+#@     sproc_pinfo -mode stop
+#@     return $val
+#@   }
+#@ 
+#@   if { ![scan $val "%f" match] } {
+#@     sproc_msg -error "sproc_metric_normalize cannot process value $val"
+#@     sproc_pinfo -mode stop
+#@     return "NaM"
+#@   }
+#@ 
+#@   if { $options(-current_unit) != "" } {
+#@     set cur_unit [string tolower $options(-current_unit)]
+#@     if { [array names normalize_lut -exact $cur_unit] != "" } {
+#@       set norm_scalar $normalize_lut($cur_unit)
+#@     } else {
+#@       sproc_msg -error "sproc_metric_normalize not configured to convert $cur_unit"
+#@       sproc_pinfo -mode stop
+#@       return "NaM"
+#@     }
+#@   }
+#@ 
+#@   set val_out [expr $val * $norm_scalar]
+#@ 
+#@   sproc_pinfo -mode stop
+#@ 
+#@   return $val_out
+#@ 
+#@ }
+#@ 
+#@ define_proc_attributes sproc_metric_normalize \
+#@   -info "Used to convert metric numbers from one unit standard to another." \
+#@   -define_args {
+#@   {-value "value to convert" decimal string required}
+#@   {-current_unit "Units of current value" AString string required}
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_metric_format:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_metric_format { format_string arg } {
+#@   if { $arg == "NaM" } {
+#@     return "NaM"
+#@   } else {
+#@     return [format $format_string $arg]
+#@   }
+#@ }
+#@ 
+#@ define_proc_attributes sproc_metric_format \
+#@   -info "Used to return NaM value or formatted value as part of metrics processing." \
+#@   -define_args {
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_metric_time_elapsed:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_metric_time_elapsed { args } {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   set options(-start) 0
+#@   set options(-stop) 0
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   set seconds_in_day [expr 24 * 3600.0]
+#@   set total_seconds [expr $options(-stop) - $options(-start)]
+#@   set num_days_f [expr floor($total_seconds / $seconds_in_day)]
+#@   set partial_day_f [expr ($total_seconds / $seconds_in_day) - $num_days_f]
+#@   set num_days [expr int($num_days_f)]
+#@   set partial_day [expr int($partial_day_f * $seconds_in_day)]
+#@   set hms [clock format $partial_day -format %T -gmt true]
+#@   set dhms [format "%02d:%s" $num_days $hms]
+#@ 
+#@   sproc_pinfo -mode stop
+#@   return "$dhms"
+#@ }
+#@ 
+#@ define_proc_attributes sproc_metric_time_elapsed \
+#@   -info "Used to generate metrics related to duration of task execution." \
+#@   -define_args {
+#@   {-start "Indicates start time in seconds." "" int required}
+#@   {-stop  "Indicates stop time in seconds." "" int required}
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_metric_atpg:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_metric_atpg { args } {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   global env SEV SVAR TEV
+#@ 
+#@   if { ( $SEV(metrics_enable) == 0 ) } {
+#@     sproc_pinfo -mode stop
+#@     return
+#@   }
+#@ 
+#@   parse_proc_arguments -args $args options
+#@ 
+#@   ## Set default values
+#@ 
+#@   set total_faults NaM
+#@   set test_coverage NaM
+#@   set fault_coverage 0
+#@   set atpg_effectiveness 0
+#@ 
+#@   ## Generate and parse report
+#@ 
+#@   redirect -variable report {
+#@     report_summaries
+#@   }
+#@ 
+#@   set fault_types "Iddq Transition Path_delay Bridging Dynamic_bridging Hold_time IDDQ_bridging"
+#@ 
+#@   foreach fault_type $fault_types {
+#@     set ${fault_type}_faults "NaM"
+#@     set ${fault_type}_coverage "NaM"
+#@   }
+#@   set lines [split $report "\n"]
+#@   foreach line $lines {
+#@     foreach fault_type $fault_types {
+#@       regexp "$fault_type\\s+\(\[\\.\\d\]+\)\\s+\(\[\\.\\d\]+\)\\%" $line matchVar ${fault_type}_faults ${fault_type}_coverage
+#@       regexp {total faults\s+([\d]+)} $line matchVar total_faults
+#@       regexp {test coverage\s+([\.\d]+)\%} $line matchVar fault_coverage
+#@     }
+#@   }
+#@ 
+#@   ## Print results
+#@ 
+#@   sproc_msg -info "METRIC | INTEGER ATPG.TRANSITION.FAULTS         | $Transition_faults"
+#@   sproc_msg -info "METRIC | DOUBLE  ATPG.TRANSITION.COVERAGE       | $Transition_coverage"
+#@   sproc_msg -info "METRIC | INTEGER ATPG.BRIDGING.FAULTS           | $Bridging_faults"
+#@   sproc_msg -info "METRIC | DOUBLE  ATPG.BRIDGING.COVERAGE         | $Bridging_coverage"
+#@   sproc_msg -info "METRIC | INTEGER ATPG.HOLD_TIME.FAULTS          | $Hold_time_faults"
+#@   sproc_msg -info "METRIC | DOUBLE  ATPG.HOLD_TIME.COVERAGE        | $Hold_time_coverage"
+#@   sproc_msg -info "METRIC | INTEGER ATPG.IDDQ_BRIDGING.FAULTS      | $IDDQ_bridging_faults"
+#@   sproc_msg -info "METRIC | DOUBLE  ATPG.IDDQ_BRIDGING.COVERAGE    | $IDDQ_bridging_coverage"
+#@   sproc_msg -info "METRIC | INTEGER ATPG.IDDQ.FAULTS               | $Iddq_faults"
+#@   sproc_msg -info "METRIC | DOUBLE  ATPG.IDDQ.COVERAGE             | $Iddq_coverage"
+#@   sproc_msg -info "METRIC | INTEGER ATPG.PATH_DELAY.FAULTS         | $Path_delay_faults"
+#@   sproc_msg -info "METRIC | DOUBLE  ATPG.PATH_DELAY.COVERAGE       | $Path_delay_coverage"
+#@   sproc_msg -info "METRIC | INTEGER ATPG.DYNAMIC_BRIDGING.FAULTS   | $Dynamic_bridging_faults"
+#@   sproc_msg -info "METRIC | DOUBLE  ATPG.DYNAMIC_BRIDGING.COVERAGE | $Dynamic_bridging_coverage"
+#@   sproc_msg -info "METRIC | INTEGER ATPG.STUCK_AT.FAULTS   | $total_faults"
+#@   sproc_msg -info "METRIC | DOUBLE  ATPG.STUCK_AT.COVERAGE | $fault_coverage"
+#@   sproc_pinfo -mode stop
+#@ }
+#@ 
+#@ define_proc_attributes sproc_metric_atpg \
+#@   -info "Gathers ATPG information for metrics reporting." \
+#@   -define_args {
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## sproc_early_complete:
+#@ ## -----------------------------------------------------------------------------
+#@ 
+#@ proc sproc_early_complete  {} {
+#@ 
+#@   sproc_pinfo -mode start
+#@ 
+#@   global SEV SVAR
+#@   global synopsys_program_name
+#@ 
+#@   if { $SVAR(misc,early_complete_enable) } {
+#@ 
+#@     sproc_msg -warning "Early complete enabled."
+#@ 
+#@     set fname [file rootname $SEV(log_file)].early
+#@     set fid [open $fname w]
+#@     puts $fid "Early complete at [date]"
+#@     close $fid
+#@ 
+#@   } else {
+#@ 
+#@     sproc_msg -warning "Early complete disabled."
+#@ 
+#@   }
+#@ 
+#@   sproc_pinfo -mode stop
+#@ 
+#@ }
+#@ 
+#@ define_proc_attributes sproc_early_complete  \
+#@   -info "Procedure to signal early completion of task to RTM." \
+#@   -define_args {
+#@ }
+#@ 
+#@ 
+#@ if { $SEV(project_name) != "lcrm" } {
+#@   puts "Error: SEV(project_name) is not set to 'lcrm'. This is the expected default for most lcrm users. Change in the system environment variable editor. If you understand the impact on metric capture, edit lcrm_setup.tcl to remove this error message"
+#@   if { $LYNX(rtm_present) } {
+#@     exit
+#@   }
+#@ 
+#@ }
+#@ 
+#@ ## -----------------------------------------------------------------------------
+#@ ## End of File
+#@ ## -----------------------------------------------------------------------------
+#@ # -- End source ../rm_setup/icrm_setup.tcl
+
+#@ source ../rm_setup/icc_setup.tcl 
+#@ # -- Starting source ../rm_setup/icc_setup.tcl
+
+#@ puts "RM-Info: Running script [info script]\n"
+#@ 
+#@ ##########################################################################################
+#@ # Variables for IC Compiler Reference Methodology, IC Compiler Design Planning Reference 
+#@ # Methodology, and IC Compiler Hierarchical Reference Methodology 
+#@ # Script: icc_setup.tcl
+#@ # Version: G-2012.06 (July 2, 2012)
+#@ # Copyright (C) 2007-2012 Synopsys, Inc. All rights reserved.
+#@ ##########################################################################################
+#@ 
+#@ # Sourcing the common variables
+#@ source  ../rm_setup/common_setup.tcl 
+#@ # -- Starting source ../rm_setup/common_setup.tcl
+
+#@ puts "RM-Info: Running script [info script]\n"
+#@ 
+#@ ##########################################################################################
+#@ # Variables common to all reference methodology scripts
+#@ # Script: common_setup.tcl
+#@ # Version: G-2012.06 (July 2, 2012)
+#@ # Copyright (C) 2007-2012 Synopsys, Inc. All rights reserved.
+#@ ##########################################################################################
+#@ 
+#@ set DESIGN_NAME                   "control_pad"  ;#  The name of the top-level design
+#@ 
+#@ # 
+#@ set WORKSHOP_REF_PATH             "../../../ref"
+#@ set ICC_INPUTS_PATH               "../design_data"
+#@ set LIBRARY_TOP_PATH              "/home/eda/lib/smic"
+#@ 
+#@ set DESIGN_REF_PAD_PATH               "${LIBRARY_TOP_PATH}/SP013D3_V1p4"
+#@ set DESIGN_REF_SDCELL_PATH            "${LIBRARY_TOP_PATH}/aci/sc-x"
+#@ set DESIGN_REF_TECH_PATH          "${DESIGN_REF_SDCELL_PATH}/apollo/tf"
+#@ 
+#@ ##########################################################################################
+#@ # Hierarchical Flow Design Variables
+#@ ##########################################################################################
+#@ 
+#@ set HIERARCHICAL_DESIGNS           "" ;# List of hierarchical block design names "DesignA DesignB" ...
+#@ set HIERARCHICAL_CELLS             "" ;# List of hierarchical block cell instance names "u_DesignA u_DesignB" ...
+#@ 
+#@ ##########################################################################################
+#@ # Library Setup Variables
+#@ ##########################################################################################
+#@ 
+#@ # For the following variables, use a blank space to separate multiple entries.
+#@ # Example: set TARGET_LIBRARY_FILES "lib1.db lib2.db lib3.db"
+#@ 
+#@ set ADDITIONAL_SEARCH_PATH        [join "
+#@ 	${DESIGN_REF_PAD_PATH}/syn
+#@ 	${DESIGN_REF_SDCELL_PATH}/synopsys
+#@         ${LIBRARY_TOP_PATH}/SmicSPM4PR8R_starRCXT013_mixrf_p1mtx_1233_V1/SmicSPM4PR8R_starRCXT013_mixrf_p1mtx_1233_V1.6/mapping/TM9k_MIM1f
+#@         ${LIBRARY_TOP_PATH}/SmicSPM4PR8R_starRCXT013_mixrf_p1mtx_1233_V1/SmicSPM4PR8R_starRCXT013_mixrf_p1mtx_1233_V1.6/ITF/TM9k_MIM1f/TLUPLUS
+#@ 	"]
+#@ 
+#@ #	setup
+#@ #		hold
+#@ #			leakage (and hold_hot)
+#@ #	setup_hot
+#@ #
+#@ set TARGET_LIBRARY_FILES     [join "
+#@  typical_1v2c25.db
+#@ SP013D3_V1p2_typ.db	
+#@ "]
+#@ 
+#@ set ADDITIONAL_LINK_LIB_FILES     [join "
+#@ typical_1v2c25.db
+#@ SP013D3_V1p2_typ.db
+#@ 	"]
+#@ 
+#@ set MIN_LIBRARY_FILES             ""  ;#  List of max min library pairs "max1 min1 max2 min2 max3 min3"...
+#@ 
+#@ set MW_REFERENCE_LIB_DIRS         [join "
+#@ 	${DESIGN_REF_SDCELL_PATH}/apollo/smic13g
+#@         ${DESIGN_REF_PAD_PATH}/apollo/SP013D3_V1p2_8MT
+#@ 	"]
+#@ 
+#@ set MW_REFERENCE_CONTROL_FILE     ""  ;#  Reference Control file to define the Milkyway reference libs
+#@ 
+#@ set TECH_FILE                     "${DESIGN_REF_TECH_PATH}/smic13lvt_8lm.tf"  ;#  Milkyway technology file
+#@ #reminder: update tech file to saed32nm_1p9m_mw.tf
+#@ set MAP_FILE                      "${DESIGN_REF_TECH_PATH}/star_rc/saed32nm_tf_itf_tluplus.map"  ;#  Mapping file for TLUplus
+#@ set TLUPLUS_MAX_FILE              "${DESIGN_REF_TECH_PATH}/star_rc/saed32nm_1p9m_Cmax.tluplus"  ;#  Max TLUplus file
+#@ set TLUPLUS_MIN_FILE              "${DESIGN_REF_TECH_PATH}/star_rc/saed32nm_1p9m_Cmin.tluplus"  ;#  Min TLUplus file
+#@ 
+#@ 
+#@ set MW_POWER_NET                "VDD" ;#
+#@ set MW_POWER_PORT               "VDD" ;#
+#@ set MW_GROUND_NET               "VSS" ;#
+#@ set MW_GROUND_PORT              "VSS" ;#
+#@ 
+#@ set MIN_ROUTING_LAYER            "M1"   ;# Min routing layer
+#@ set MAX_ROUTING_LAYER            "M8"   ;# Max routing layer
+#@ 
+#@ set LIBRARY_DONT_USE_FILE        ""   ;# Tcl file with library modifications for dont_use
+#@ 
+#@ ##########################################################################################
+#@ # Multivoltage Common Variables
+#@ #
+#@ # Define the following multivoltage common variables for the reference methodology scripts 
+#@ # for multivoltage flows. 
+#@ # Use as few or as many of the following definitions as needed by your design.
+#@ ##########################################################################################
+#@ 
+#@ set PD1                          ""           ;# Name of power domain/voltage area  1
+#@ set VA1_COORDINATES              {}           ;# Coordinates for voltage area 1
+#@ set MW_POWER_NET1                "VDD1"       ;# Power net for voltage area 1
+#@ 
+#@ set PD2                          ""           ;# Name of power domain/voltage area  2
+#@ set VA2_COORDINATES              {}           ;# Coordinates for voltage area 2
+#@ set MW_POWER_NET2                "VDD2"       ;# Power net for voltage area 2
+#@ 
+#@ set PD3                          ""           ;# Name of power domain/voltage area  3
+#@ set VA3_COORDINATES              {}           ;# Coordinates for voltage area 3
+#@ set MW_POWER_NET3                "VDD3"       ;# Power net for voltage area 3
+#@ set PD4                          ""           ;# Name of power domain/voltage area  4
+#@ set VA4_COORDINATES              {}           ;# Coordinates for voltage area 4
+#@ set MW_POWER_NET4                "VDD4"       ;# Power net for voltage area 4
+#@ 
+#@ puts "RM-Info: Completed script [info script]\n"
+#@ 
+#@ # -- End source ../rm_setup/common_setup.tcl
+
+#@ 
+#@ ###############################
+#@ ## Flow Variables
+#@ ###############################
+#@ set ICC_INIT_DESIGN_INPUT         "VERILOG"    ;# VERILOG|DDC|MW; specify the type of starting point;
+#@ ;# if "VERILOG" is specified, you should also specify a valid $ICC_IN_VERILOG_NETLIST_FILE
+#@ ;# if "DDC" is specified, you should also specify a valid $ICC_IN_DDC_FILE 
+#@ ;# if "MW" is specified, you should also specify a valid $ICC_INPUT_CEL
+#@ ;# If MW is specified, script will copy Milkyway design library from rm_dc/work/dc to rm_icc/work 
+#@ set POWER_OPTIMIZATION            TRUE         ;# TRUE|FALSE; set TRUE to enable power optimization (-power option) for the core commands such as place_opt, clock_opt, 
+#@ ;# route_opt, and focal_opt. If $ICC_CUSTOM_MULTI_VTH_CONSTRAINT_SCRIPT below is also specified, 
+#@ ;# leakage power optimization is focused on lvt cell reduction; otherwise focused on leakage power reduction.
+#@ ;# for MCMM, set set_scenario_options -leakage true to enable leakage power optimization on scenarios;
+#@ ;# see rm_icc_scripts/mcmm.scenarios.example for more details.
+#@ set ICC_CUSTOM_MULTI_VTH_CONSTRAINT_SCRIPT ""  ;# script for customized set_multi_vth_constraints constraints. effective only when $POWER_OPTIMIZATION is set to TRUE;
+#@ ;# specify to make leakage power optimization focused on lvt cell reduction; 
+#@ ;# refer to rm_icc_scripts/multi_vth_constraint.example as an example.	   
+#@ set DFT                           FALSE	       ;# TRUE|FALSE; set TRUE to enable scan reordering flow and add -optimize_dft option to place_opt and clock_opt commands;
+#@ ;# if set TRUE, you should also provide a valid $ICC_IN_SCAN_DEF_FILE
+#@ set ICC_TIE_CELL_FLOW             TRUE        ;# TRUE|FALSE, set TRUE if you want TIE-CELLS to be used during optimizations instead of TIE-nets
+#@ set ICC_DBL_VIA                   TRUE         ;# TRUE|FALSE; set TRUE to enable redundant via insertion; more options in "Chipfinishing Variables" section
+#@ set ICC_FIX_ANTENNA               FALSE        ;# TRUE|FALSE: set TRUE to enable antenna fixing; more options in "Chipfinishing Variables" section
+#@ set ADD_FILLER_CELL               FALSE        ;# TRUE|FALSE; set TRUE to enable std cells filler insertion; more options in "Chipfinishing Variables" section
+#@ set ICC_REDUCE_CRITICAL_AREA      TRUE         ;# TRUE|FALSE; set TRUE to enable detail route wire spreading
+#@ set ICC_CREATE_MODEL              FALSE        ;# TRUE|FALSE; set TRUE to create block abstraction (or ILM) and FRAM view (at block level)
+#@ set ICC_CREATE_BLOCK_ABSTRACTION  TRUE	       ;# TRUE|FALSE; set TRUE to create block abstraction, set to FALSE to create ILM (at block level)
+#@ set ADD_METAL_FILL                "ICV"        ;# NONE|ICC|HERCULES|ICV; more options in "Chipfinishing Variables" section
+#@ ;# ICC : timing driven metal fill using IC Compiler
+#@ ;# HERCULES : signoff metal fill using Hercules
+#@ ;# ICV : signoff metal fill using IC Validator
+#@ set ICC_REPORTING_EFFORT          "MED"        ;# OFF|LOW|MED; if set to OFF, no reporting is done; if set to LOW, report_qor/report_constraints/report_power are skipped,
+#@ ;# additionally, report_timing is skipped in clock_opt_cts
+#@ set ICC_SANITY_CHECK              FALSE        ;# TRUE|FALSE, set TRUE to perform check_physical_design
+#@ set ICC_ENABLE_CHECKPOINT	  FALSE	       ;# TRUE|FALSE, set TRUE to perform checkpoint strategy for optimization commands 
+#@ ;# ensure there is enough disk space before enabling this feature. refer to the set_checkpoint_strategy man page for details.
+#@ 
+#@ ###############################
+#@ ## General Variables
+#@ ###############################
+#@ set ICC_INPUT_CEL                 "${DESIGN_NAME}_DCT" ;# starting CEL for flow with a Milkyway CEL input which can be the final CEL from Design Compiler Topographical 
+#@ set PNET_METAL_LIST               ""           	;# List of metals in the design to be used for (partial) pnet options
+#@ set PNET_METAL_LIST_COMPLETE	  ""	       	;# List of metals in the design to be used for (complete) pnet options
+#@ set ICC_IN_DONT_USE_FILE          "$LIBRARY_DONT_USE_FILE" ;# script with library modifications for dont_use; default to $LIBRARY_DONT_USE_FILE in common_setup.tcl 
+#@ set ICC_FIX_HOLD_PREFER_CELLS     ""           	;# Syntax: library/cell_name - Example: slow/DLY1X1 slow/DLY1X4
+#@ set ICC_MAX_AREA                  ""           	;# max_area value used during area optimization
+#@ set AREA_CRITICAL_RANGE_PRE_CTS   ""           	;# area critical range use during area optimization during place_opt
+#@ set AREA_CRITICAL_RANGE_POST_CTS  ""           	;# area critical range use during area optimization during post-CTS optimization 
+#@ set AREA_CRITICAL_RANGE_POST_RT   ""           	;# area critical range use during area optimization during route_opt
+#@ set POWER_CRITICAL_RANGE_PRE_CTS  ""           	;# power critical range use during area optimization during place_opt
+#@ set POWER_CRITICAL_RANGE_POST_CTS ""           	;# power critical range use during area optimization during post-CTS optimization 
+#@ set POWER_CRITICAL_RANGE_POST_RT  ""           	;# power critical range use during area optimization during route_opt
+#@ set ICC_NUM_CPUS                  1            	;# number of cpus for distributed processing
+#@ ;# specify a number greater than 1 to enable it for classic router based route_opt and insert_redundant_via commands
+#@ set ICC_NUM_CORES                 4            	;# number of cores on the local host for multicore support; 4 cores are recommended for IC Validator based signoff_metal_fill and
+#@ ;# signoff_drc commands
+#@ if {[info exists TEV(num_cores)] && [info exists env(LYNX_RTM_PRESENT)]} {
+#@ set ICC_NUM_CORES                 $TEV(num_cores)  ;# TEV(num_cores) must be used to control the number of cores when running in Lynx;
+#@                                                    ;# Only configure TEV(num_cores) using the Lynx RTM or by editing at the top of the LCRM script
+#@ }
+#@ set PLACE_OPT_EFFORT 		  "medium"      ;# low|medium|high; choose effort level for place_opt command
+#@ set ROUTE_OPT_EFFORT 		  "medium"      ;# low|medium|high; choose effort level for route_opt command
+#@ set PLACE_OPT_CONGESTION_DRIVEN	  TRUE          ;# TRUE|FALSE; set TRUE to enable congestion removal during place_opt command (place_opt_icc step) and 
+#@ ;# clock_opt -only_psyn command (clock_opt_psyn_icc step) 
+#@ 
+#@ set PLACE_OPT_PREROUTE_FOCALOPT_LAYER_OPTIMIZATION FALSE 
+#@ ;# TRUE|FALSE; set TRUE to perform layer optimization (preroute_focal_opt -layer_optimization) 
+#@ ;# on existing buffer trees after place_opt command (place_opt_icc step)
+#@ set CLOCK_OPT_PSYN_PREROUTE_FOCALOPT_LAYER_OPTIMIZATION FALSE 
+#@ ;# TRUE|FALSE; set TRUE to perform layer optimization (preroute_focal_opt -layer_optimization) 
+#@ ;# on existing buffer trees after clock_opt -only_psyn command (clock_opt_psyn_icc step)
+#@ set ICC_CREATE_GR_PNG             FALSE  	;# TRUE|FALSE; set TRUE to create a global route congestion map snapshot in PNG format at the end of route_icc step
+#@ set ICC_WRITE_FULL_CHIP_VERILOG   FALSE		;# TRUE|FALSE; set TRUE for write_verilog in outputs_icc.tcl to write out module definitions for soft macros 
+#@ 
+#@ set ICC_FLOORPLAN_CEL            ""	     		     
+#@ 
+#@ ############################################################
+#@ ## Customized Constraint Script for Core Commands (Optional)
+#@ ############################################################ 
+#@ set CUSTOM_PLACE_OPT_PRE_SCRIPT ""		;# An optional Tcl file; if specified, will be sourced right before the place_opt core command;
+#@ ;# review place_opt_icc.tcl script for exact location where this is sourced to avoid overlap with existing constraints
+#@ set CUSTOM_PLACE_OPT_POST_SCRIPT ""		;# An optional Tcl file; if specified, will be sourced right after the place_opt core command;
+#@ ;# review place_opt_icc.tcl script for exact location where this is sourced to avoid overlap with existing constraints
+#@ set CUSTOM_CLOCK_OPT_CTS_PRE_SCRIPT ""		;# An optional Tcl file; if specified, will be sourced right before the clock_opt -only_cts core command;
+#@ ;# review clock_opt_cts_icc.tcl script for exact location where this is sourced to avoid overlap with existing constraints
+#@ set CUSTOM_CLOCK_OPT_CTS_POST_SCRIPT ""		;# An optional Tcl file; if specified, will be sourced right after the clock_opt -only_cts core command;
+#@ ;# review clock_opt_cts_icc script for exact location where this is sourced to avoid overlap with existing constraints
+#@ set CUSTOM_CLOCK_OPT_PSYN_PRE_SCRIPT ""		;# An optional Tcl file; if specified, will be sourced right before the clock_opt -only_psyn core command;
+#@ ;# review clock_opt_psyn_icc.tcl script for exact location where this is sourced to avoid overlap with existing constraints
+#@ set CUSTOM_CLOCK_OPT_PSYN_POST_SCRIPT ""	;# An optional Tcl file; if specified, will be sourced right after the clock_opt -only_psyn core command;
+#@ ;# review clock_opt_psyn_icc.tcl script for exact location where this is sourced to avoid overlap with existing constraints
+#@ set CUSTOM_ROUTE_OPT_PRE_SCRIPT ""		;# An optional Tcl file; if specified, will be sourced right before the route_opt core command;
+#@ ;# review route_opt_icc.tcl script for exact location where this is sourced to avoid overlap with existing constraints
+#@ set CUSTOM_ROUTE_OPT_POST_SCRIPT ""		;# An optional Tcl file; if specified, will be sourced right after the route_opt core command;
+#@ ;# review route_opt_icc.tcl script for exact location where this is sourced to avoid overlap with existing constraints
+#@ 
+#@ ###############################
+#@ ## Floorplan Input Variables          		    
+#@ ###############################
+#@ set ICC_FLOORPLAN_INPUT           	"CREATE";# DEF | FP_FILE | CREATE | USER_FILE | SKIP; "DEF" reads $ICC_IN_DEF_FILE; "FP_FILE" reads ICC_IN_FLOORPLAN_FILE;
+#@ ;# "CREATE" uses create_floorplan command; "USER_FILE" sources $ICC_IN_FLOORPLAN_USER_FILE; 
+#@ ;# "SKIP" skips floorplanning section
+#@ set ICC_IN_DEF_FILE		  	""	;# Complete floorplan file in DEF format
+#@ set ICC_IN_SPG_DEF_FILE		        ""	;# Standard cell placement in DEF format from DC for Physical Guidance flow.
+#@ ;# The default naming convention for this file from DC-RM is ${DESIGN_NAME}.mapped.std_cell.def
+#@ set ICC_IN_FLOORPLAN_FILE	  	""	;# Complete floorplan file generated by write_floorplan 
+#@ set ICC_IN_FLOORPLAN_USER_FILE	  	""	;# Complete floorplan file generated by user; This file will simply be sourced.
+#@ set ICC_IN_PIN_PAD_PHYSICAL_CONSTRAINTS_FILE ""	;# I/O constraint file generated by write_pin_pad_physical_constraints which contains pin or pad information
+#@ ;# applied prior to create_floorplan command   
+#@ set ICC_IN_PHYSICAL_ONLY_CELLS_CREATION_FILE "" ;# a file to include physical-only cell creation commands to be sourced
+#@ ;# e.g. create_cell {vdd1left vdd1right vdd1top vdd1bottom} pvdi
+#@ set ICC_IN_PHYSICAL_ONLY_CELLS_CONNECTION_FILE "" ;# a file to include physical-only cell connection commands to be sourced
+#@ ;# e.g. derive_pg_connection -power_net $MW_POWER_NET -power_pin $MW_POWER_PORT -ground_net $MW_GROUND_NET -ground_pin $MW_GROUND_PORT -cells {vdd1left vdd1right vdd1top vdd1bottom}
+#@ 
+#@ set ICC_PHYSICAL_CONSTRAINTS_FILE 	""	;# script to add incremental floorplan constraints which will be sourced after read_def, read_floorplan, or floorplan creation
+#@ set CUSTOM_CONNECT_PG_NETS_SCRIPT 	""      ;# script for customized derive_pg_connection commands which replaces the default derive_pg_connection commands in the scripts   
+#@ 
+#@ ###############################
+#@ ## Timing Variables
+#@ ###############################
+#@ set ICC_APPLY_RM_DERATING               FALSE 	;# TRUE|FALSE; when set to FALSE, the derating is assumed to be set in the SDC
+#@ set ICC_LATE_DERATING_FACTOR	        1.01 	;# Late derating factor, used for both data and clock 
+#@ set ICC_EARLY_DERATING_FACTOR	        0.99 	;# Early derating factor, used for both data and clock 
+#@ 
+#@ set ICC_APPLY_RM_UNCERTAINTY_PRECTS     FALSE	;# TRUE|FALSE; when set to TRUE, user uncertainty will be replaced by $ICC_UNCERTAINTY_PRECTS
+#@ set ICC_APPLY_RM_UNCERTAINTY_POSTCTS    FALSE	;# TRUE|FALSE; when set to TRUE, user uncertainty will be replaced by $ICC_UNCERTAINTY_POSTCTS
+#@ set ICC_UNCERTAINTY_PRECTS_FILE         ""   	;# Pre-cts uncertainty file used during place_opt
+#@ set ICC_UNCERTAINTY_POSTCTS_FILE        ""   	;# Post-cts uncertainty file used during post-CTS optimization and route_opt
+#@ set ICC_MAX_TRANSITION                  ""   	;# max_transition value set on the design
+#@ set ICC_CRITICAL_RANGE                  ""   	;# critical_range set on the design; default = 50% of each clock period
+#@ set ICC_MAX_FANOUT                      ""   	;# max_fanout value set on the design
+#@ set ICC_FULL_ARNOLDI                    FALSE	;# TRUE|FALSE; when set to TRUE, will enable full-Arnoldi, i.e. no net filtering
+#@ 
+#@ ###############################
+#@ ## Multivoltage Variables                       
+#@ ###############################
+#@ set ICC_IN_RESOLVE_SUPPLY_SET_UPF_FILE  ""      ;# For UPF flow with VERILOG inputs, provide a secondary UPF file to resolve supply sets after reading in the UPF file.
+#@ set CUSTOM_CREATE_VA_SCRIPT             "ORCA_TOP.VA.tcl"     	;# For voltage area creation, provide a customized tcl script. If not provided, you can use the $ICC_DP_AUTO_CREATE_VA
+#@ ;# feature which automatically creates voltage area through rm_icc_dp_scripts/create_va_dp.tcl. Otherwise, voltage area
+#@ ;# can be created by create_voltage_area commands in the init_design_icc.tcl. 
+#@ set ICC_DP_AUTO_CREATE_VA               FALSE  	;# TRUE|FALSE; set TRUE to automatically create voltage area based on user specified utilization in 
+#@ ;# rm_icc_dp_scripts/create_va_dp.tcl. 
+#@ set CUSTOM_POWER_SWITCH_SCRIPT          ""     	;# A Tcl script to define commands for headers_footers and sleep pin connection
+#@ set CUSTOM_SECONDARY_POWER_ROUTE_SCRIPT ""     	;# A Tcl script to define the pre_route_standard_cells command for always-on/retention register cells 
+#@ set RR_CELLS                            ""     	;# Specify naming pattern for retention register library cells. Matched cells are set as don't toutch cells and fixed; 
+#@ ;# For example, specify "RSD" if each retention register contains RSD in its library cell name
+#@ set ICC_UPF_PM_CELL_EXISTING		FALSE	;# TRUE|FALSE; set TRUE to run associate_mv_cells command if design contains pre-existing power management cells.
+#@ set ICC_UPF_PM_CELL_INSERTION		FALSE	;# TRUE|FALSE; set TRUE to run insert_mv_cells command.
+#@ set ICC_AO_STRATEGY_SINGLE_POWER_POWER_DOMAIN_LIST ""		;# A list of power domains for a single power always-on strategy.
+#@ set CUSTOM_AO_STRATEGY_SINGLE_POWER_CREATE_BOUND_SCRIPT ""	;# A Tcl script to create bound for single power always-on cells
+#@ set CUSTOM_AO_STRATEGY_SINGLE_POWER_SET_POWER_GUIDE_SCRIPT ""	;# A Tcl script that associates power guides with bounds created by $CUSTOM_AO_STRATEGY_SINGLE_POWER_CREATE_BOUND_SCRIPT
+#@ 
+#@ ###############################
+#@ ## MCMM Input variables                             
+#@ ###############################
+#@ set ICC_MCMM_SCENARIOS_FILE             "mcmm.scenarios.tcl"	;# A file containing scenario definitions - examples in rm_icc_scripts/mcmm.scenarios.example
+#@ set ICC_MCMM_PLACE_OPT_SCENARIOS        ""     	;# list of scenarios to be made active during place_opt; optional; by default all scenarios will be made active
+#@ set ICC_MCMM_CLOCK_OPT_PSYN_SCENARIOS   ""     	;# list of scenarios to be made active during post-CTS optimization (pre-route); optional; by default all scenarios will be made active
+#@ set ICC_MCMM_CLOCK_OPT_ROUTE_SCENARIOS  ""     	;# list of scenarios to be made active during clock routing; optional; by default all scenarios will be made active
+#@ set ICC_MCMM_ROUTE_SCENARIOS            ""     	;# list of scenarios to be made active during signal routing; optional; by default all scenarios will be made active
+#@ set ICC_MCMM_ROUTE_OPT_SCENARIOS        ""     	;# list of scenarios to be made active during route_opt; optional; by default all scenarios will be made active
+#@ set ICC_MCMM_CHIP_FINISH_SCENARIOS      ""     	;# list of scenarios to be made active during route_opt post chipfinish; optional; by default all scenarios will be made active
+#@ set ICC_MCMM_METAL_FILL_SCENARIOS       ""     	;# list of scenarios to be made active during metal filling; optional; by default all scenarios will be made active
+#@ set ICC_MCMM_FOCAL_OPT_SCENARIOS        ""     	;# list of scenarios to be made active during focal_opt; optional; by default all scenarios will be made active
+#@ 
+#@ 
+#@ #######################################
+#@ ## Clock Tree Synthesis (CTS) Variables
+#@ #######################################
+#@ set ICC_CTS_RULE_NAME		"iccrm_clock_double_spacing" ;# specify the name of a clock nondefault routing rule that you have defined (for ex, in common_cts_settings_icc.tcl); 
+#@ ;# it will be associated with set_clock_tree_options -routing_rule  
+#@ ;# If ICC_CTS_RULE_NAME is set to iccrm_clock_double_spacing, double spacings will be applied to all layers
+#@ set ICC_CTS_LAYER_LIST		""		;# clock tree layers, usually M3 and above; e.g. set ICC_CTS_LAYER_LIST "M3 M4 M5"
+#@ set ICC_CTS_REF_LIST		""		;# cells for CTS; a space-deliminated list: cell1 cell2 
+#@ set ICC_CTS_REF_DEL_INS_ONLY	""		;# cells for CTS delay insertion; a space-deliminated list: cell1 cell2
+#@ set ICC_CTS_REF_SIZING_ONLY	""		;# cells for CTS sizing only; a space-deliminated list: cell1 cell2 
+#@ set ICC_CTS_SHIELD_RULE_NAME	""		;# specify clock shielding rule name; requires $ICC_CTS_SHIELD_SPACINGS, $ICC_CTS_SHIELD_WIDTHS to be also specified    
+#@ set ICC_CTS_SHIELD_SPACINGS	""		;# specify clock shielding spacing associated with shielding rule; a list of layer name and spacing pairs
+#@ set ICC_CTS_SHIELD_WIDTHS	""		;# specify clock shielding width associated with shielding rule: a list of layer name and width pair
+#@ set ICC_CTS_SHIELD_CLK_NAMES	""		;# optionally specify a subset of clock names to apply the clock shielding rule: $ICC_CTS_SHIELD_RULE_NAME;
+#@ ;# if not specified, $ICC_CTS_SHIELD_RULE_NAME will be applied to all clock nets 
+#@ 
+#@ set ICC_CTS_INTERCLOCK_BALANCING	FALSE	;# TRUE|FALSE; set TRUE to enable -inter_clock_balance for "clock_opt -only_cts" at clock_opt_cts_icc task;
+#@ ;# specify $ICC_CTS_INTERCLOCK_BALANCING_OPTIONS_FILE to set the options  
+#@ set ICC_CTS_INTERCLOCK_BALANCING_OPTIONS_FILE	"" ;# an optional file which contains set_inter_clock_delay_options commands
+#@ set ICC_CTS_UPDATE_LATENCY	FALSE		;# set TRUE to perform clock latency update post CTS
+#@ set ICC_CTS_LATENCY_OPTIONS_FILE	""	;# an optional file which specifies the latency adjustment options
+#@ 
+#@ set ICC_CTS_SELF_GATING		FALSE		;# TRUE|FALSE; set TRUE to insert XOR self-gating logic during clock tree synthesis before clock tree construction
+#@ ;# An optional gate-level SAIF file ($ICC_IN_SAIF_FILE) is recommended in order to provide clock activity information
+#@ set ICC_IN_SAIF_FILE            "$DESIGN_NAME.saif" ;# An optional gate-level SAIF file for self-gating ($ICC_CTS_SELF_GATING)
+#@ set ICC_SAIF_INSTANCE_NAME      $DESIGN_NAME	;# the instance in the SAIF file containing switching activity
+#@ 
+#@ set ICC_POST_CLOCK_ROUTE_CTO	FALSE  	       	;# set TRUE if to perform post route clock tree optimization after clock routing at clock_opt_route_icc step
+#@ 
+#@ #########################################
+#@ ## Chipfinishing and Metal Fill Variables
+#@ #########################################
+#@ ## end cap cells 
+#@ set ICC_H_CAP_CEL                  ""           ;# defines the horizontal CAP CELL library cell 
+#@ set ICC_V_CAP_CEL                  ""           ;# defines the vertical CAP CELL library cell (for the Well Proximity Effect)
+#@ 
+#@ ## double via insertion (ICC_DBL_VIA) options
+#@ set ICC_DBL_VIA_FLOW_EFFORT      LOW            ;# LOW|MED|HIGH  - MED enables concurrent soft-rule dbl via insertion
+#@ ;# HIGH runs another dbl via, timing driven, after chipfinishing
+#@ set ICC_CUSTOM_DBL_VIA_DEFINE_SCRIPT ""         ;# script to define the dbl via definitions
+#@ 
+#@ ## antenna fixing (ICC_FIX_ANTENNA) options
+#@ set ANTENNA_RULES_FILE           ""             ;# defines the antenna rules
+#@ set ICC_USE_DIODES               FALSE          ;# TRUE|FALSE; control variable to allow diodes to be inserted both by the 
+#@ ;# insert_port_protection_diodes command as well as the router
+#@ set ICC_ROUTING_DIODES           ""             ;# space separated list of diode names
+#@ set ICC_PORT_PROTECTION_DIODE    ""             ;# diode name for insert_port_protection_diodes
+#@ ;# Format = library_name/diode_name
+#@ set ICC_PORT_PROTECTION_DIODE_EXCLUDE_PORTS ""  ;# a list of ports to be excluded by insert_port_protection_diodes
+#@ 
+#@ ## filler cell insertion (ADD_FILLER_CELL) options
+#@ set FILLER_CELL_METAL            ""             ;# space separated list of filler cells 
+#@ set FILLER_CELL                  ""             ;# ADD_FILLER_CELL - space separated 
+#@ 
+#@ ## signal em
+#@ set ICC_FIX_SIGNAL_EM		 FALSE		;# TRUE|FALSE; set TRUE to enable signal em fixing; please uncomment the section and follow instruction in chip_finish_icc.tcl 
+#@ 
+#@ ## metal fill (ADD_METAL_FILL) options
+#@ set ICC_METAL_FILL_SPACE           2            ;# space amount used during the IC Compiler insert_metal_fill command
+#@ set ICC_METAL_FILL_TIMING_DRIVEN  TRUE          ;# enables timing driven metal fill for the IC Compiler insert_metal_fill command
+#@ 
+#@ ###############################
+#@ ## Emulation TLUplus Files
+#@ ###############################
+#@ set TLUPLUS_MAX_EMULATION_FILE         ""  	;#  Max TLUplus file
+#@ set TLUPLUS_MIN_EMULATION_FILE         ""  	;#  Min TLUplus file
+#@ 
+#@ ###############################
+#@ ## check_signoff_correlation  Variables
+#@ ###############################
+#@ set PT_DIR ""                          		;# path to PrimeTime bin directory
+#@ set PT_SDC_FILE ""                     		;# optional file in case PrimeTime has a different SDC that what is available in the IC Compiler database
+#@ set STARRC_DIR ""                      		;# path to StarRC bin directory
+#@ set STARRC_MAX_NXTGRD ""               		;# MAX NXTGRD file
+#@ set STARRC_MIN_NXTGRD ""               		;# MIN NXTGRD file
+#@ set STARRC_MAP_FILE "$MAP_FILE"        		;# NXTGRD mapping file, defaults to TLUPlus mapping file, but could be different
+#@ 
+#@ set ICC_SIGNOFF_OPT_CHECK_CORRELATION_PREROUTE_SCRIPT "" ;# a file to be sourced to run check_signoff_correlation at end of place_opt_icc step; 
+#@ ;# example - rm_icc_scripts/signoff_opt_check_correlation_preroute_icc.example.tcl
+#@ set ICC_SIGNOFF_OPT_CHECK_CORRELATION_POSTROUTE_SCRIPT "" ;# a file to be sourced to run at check_signoff_correlation end of route_opt_icc step; 
+#@ ;# example - rm_icc_scripts/signoff_opt_check_correlation_postroute_icc.example.tcl
+#@ 
+#@ ###############################
+#@ ## Signoff Physical Variables
+#@ ###############################
+#@ ## Hercules - ensure environment variable HERCULES_HOME_DIR is set and that Hercules is included in the same path from where the IC Compiler shell is executed from
+#@ ## IC Validator Metal Fill - ensure environment variable PRIMEYIELD_HOME_DIR is set and that IC Validator is included in the same path from where the IC Compiler shell is executed from
+#@ ## IC Validator DRC - ensure environment variable ICV_HOME_DIR is set and that IC Validator is included in the same path from where the IC Compiler shell is executed from
+#@ 
+#@ set SIGNOFF_FILL_RUNSET ""             		;# IC Validator|Hercules runset for signoff_metal_fill
+#@ set SIGNOFF_DRC_RUNSET  ""             		;# IC Validator|Hercules runset for signoff_drc
+#@ set SIGNOFF_MAPFILE     ""             		;# Mapping file for IC Validator|Hercules signoff_metal_fill|signoff_drc
+#@ set SIGNOFF_DRC_ENGINE	"ICV"     		;# ICV|HERCULES 
+#@ 
+#@ set SIGNOFF_METAL_FILL_TIMING_DRIVEN FALSE  	;# TRUE|FALSE : set this to TRUE to enable timing driven for IC Validator metal fill 	
+#@ set TIMING_PRESERVE_SLACK_SETUP	"0.1"  		;# float : setup slack threshold for wire_spreading/widening/timing driven IC Validator metal fill; default 0.1
+#@ set TIMING_PRESERVE_SLACK_HOLD "0"     		;# float : hold slack threshold for wire_spreading/widening; default 0
+#@ 
+#@ ###############################
+#@ ## focal_opt Variables
+#@ ###############################
+#@ set ICC_FOCAL_OPT_HOLD_VIOLS     "all"          ;# filename|all - blank to skip; filename to fix violations from a file; specify "all" to fix all hold violations
+#@ set ICC_FOCAL_OPT_SETUP_VIOLS    ""          	;# filename|all - blank to skip; filename to fix violations from a file; specify "all" to fix all setup violations
+#@ set ICC_FOCAL_OPT_DRC_NET_VIOLS  "all"          ;# filename|all - blank to skip; filename to fix violations from a file; specify "all" to fix all DRC net violations
+#@ set ICC_FOCAL_OPT_DRC_PIN_VIOLS  ""             ;# filename|all - blank to skip; filename to fix violations from a file; specify "all" to fix all DRC pin violations
+#@ set ICC_FOCAL_OPT_XTALK_VIOLS    ""             ;# filename - blank to skip; filename to fix crosstalk violations from a file
+#@ 
+#@ ###############################
+#@ ## ECO Flow Variables
+#@ ###############################
+#@ set ICC_ECO_FLOW		"NONE" 	;# NONE|UNCONSTRAINED|FREEZE_SILICON
+#@ ;# UNCONSTRAINED : NO spare cell insertion ; cells can be added (pre tapeout)
+#@ ;# FREEZE_SILICON : spare cell insertion/freeze silicon ECO
+#@ set ICC_SPARE_CELL_FILE         ""     	;# Tcl script to insert the spare cells, e.g. :
+#@ ;# insert_spare_cells -lib_cell {INV8 DFF1} -cell_name spares -num_instances 300
+#@ set ICC_ECO_FILE                ""     	;# a verilog netlist or Tcl file containing ECO changes - specify the file name and type of file using ICC_ECO_FLOW_TYPE
+#@ set ICC_ECO_FLOW_TYPE		"verilog" ;# verilog | pt_drc_setup_fixing_tcl | pt_hold_fixing_tcl - specify type of ECO file for UNCONSTRAINED ICC_ECO_FLOW;
+#@ ;# depending on the value specified, the commands used to read ECO file and place ECO cells vary;
+#@ ;# specify verilog if you provide a functional eco file for ICC_ECO_FILE;
+#@ ;# specify pt_drc_setup_fixing_tcl if you provide a change file generated by the PrimeTime fix_eco_drc or fix_eco_timing -setup commands;
+#@ ;# specify pt_hold_fixing_tcl if you provide a change file generated by the PrimeTime fix_eco_timing -hold command
+#@ set ICC_ECO_METAL_FILL_MODE	"early_stage" ;# early_stage | signoff_stage; only ICV is supported;
+#@ ;# specify early stage to use ICV DRC based metal fill trimming (faster);
+#@ ;# specify signoff_stage to perform complete ICV metal fill purge, ADR and metal fill insertion  
+#@ 
+#@ 
+#@ ########################################################################################################################
+#@ ############                        IC COMPILER DESIGN PLANNING SPECIFIC                         #######################   
+#@ ############(variables for IC Compiler Design Planning and IC Compiler Hierarchical Reference Methodologies)  ##########
+#@ ########################################################################################################################
+#@ 
+#@ ########################################################################################################################
+#@ ## Common variables (applied to both IC Compiler Design Planning and IC Compiler Hierarchical Reference Methodologies )
+#@ ########################################################################################################################
+#@ 
+#@ set ICC_DP_VERBOSE_REPORTING		FALSE		;# TRUE|FALSE; generate additional reports before placement
+#@ set ICC_DP_SET_HFNS_AS_IDEAL_THRESHOLD	""		;# integer; specify a threshold to set nets with fanout larger than it as ideal nets
+#@ set ICC_DP_SET_MIXED_AS_IDEAL		TRUE		;# TRUE|FALSE; set mixed clock/signal paths as ideal nets
+#@ 
+#@ set ICC_DP_FIX_MACRO_LIST		""		;# ""|skip|"a_list_of_macros"; unfix all macros OR skip fix OR fix specified macros before placement
+#@ set CUSTOM_ICC_DP_PLACE_CONSTRAINT_SCRIPT ""            ;# Put your set_keepout_margin and fp_set_macro_placement_constraint in this file 
+#@ set CUSTOM_ICC_DP_PREROUTE_STD_CELL_SCRIPT ""		;# File to perform customized preroute_standard_cell commands
+#@ 
+#@ ## PNS and PNA control variables
+#@ set CUSTOM_ICC_DP_PNS_CONSTRAINT_SCRIPT ""              ;# File to add PNS constraints which is loaded before running PNS
+#@ set PNS_POWER_NETS         		"${MW_POWER_NET} ${MW_GROUND_NET}" ;# Target nets for PNS; syntax is "your_power_net your_ground_net" 
+#@ set PNS_POWER_BUDGET       		1000          	;# Unit in milliWatts; default is 1000
+#@ set PNS_VOLTAGE_SUPPLY     		1.5           	;# Unit in Volts; default is 1.5
+#@ set PNS_VIRTUAL_RAIL_LAYER 		""              ;# Specify the metal layer you want to use as virtual rail
+#@ set PNS_OUTPUT_DIR         		"./pna_output"  ;# Output directory for PNS and PNA output files
+#@ set PNA_EXTRACTION_TEMPERATURE		""		;# Float; set the wire extraction temperature for PNA. Optional.
+#@ set PNA_EXTRACTION_CORNER		""		;# min|max; set the parasitic corner for RC extraction for PNA. Optional.
+#@ 
+#@ ###############################################################
+#@ ## IC Compiler Hierarchical Reference Methodology Variables
+#@ ###############################################################
+#@ 
+#@ set ICC_DP_PLAN_GROUPS		"$HIERARCHICAL_CELLS"	;# full module names from which plan groups will be created
+#@ ;#   space deliminated list: "top/A top/B top/C"
+#@ ;# default to $HIERARCHICAL_CELLS from common_setup.tcl if using Design Compiler Topographical
+#@ set ICC_DP_PLANGROUP_FILE               ""              ;# floorplan file containing plan group creation and location which should be the output of write_floorplan
+#@ 
+#@ set ICC_DP_ALLOW_FEEDTHROUGH	        FALSE		;# TRUE|FALSE; allow feedthrough creation during pin assignment 
+#@ 
+#@ set CUSTOM_ICC_DP_PNS_SCRIPT 		""              ;# customized PNS script; replacing PNS section in scripts; for template based PNS, this is required
+#@ set CUSTOM_ICC_DP_PNA_SCRIPT 		""              ;# customized PNA script; replacing PNA section in scripts
+#@ 
+#@ ## DFT-aware hierarchical design planning variables 
+#@ set ICC_DP_DFT_FLOW			FALSE		;# TRUE|FALSE; enable DFT-aware hierarchical design planning flow; requires ICC_IN_FULL_CHIP_SCANDEF_FILE
+#@ set ICC_IN_FULL_CHIP_SCANDEF_FILE "$DESIGN_NAME.mapped.expanded.scandef"		
+#@ ;# full-chip SCANDEF file for DFT-aware hierarchical design planning flow (see $ICC_DP_DFT_FLOW)
+#@ ;# used only in hierarchical design planning phase; not used or needed for block level implementations and top level assembly 
+#@ 
+#@ 
+#@ 
+#@ set BUDGETING_SDC_OUTPUT_DIR            "./sdc"         ;# budgeting SDC output directory; default is "./sdc"
+#@ 
+#@ 
+#@ set ICC_TIO_BLOCK_LIST			""		;# a list of names of block references that are to be optimized by transparent interface optimization (TIO) at route_opt_icc;
+#@ ;# default is "" (empty); if left empty, the list will be auto set to all blocks by prepare_block_dp task;
+#@ ;# however you can change it to a sub set of blocks before route_opt_icc starts  
+#@ set ICC_TIO_OPTIMIZE_BLOCK_INTERFACE    "TRUE"          ;# TRUE|FALSE; set to TRUE for TIO to optimize interface logic
+#@ set ICC_TIO_OPTIMIZE_SHARED_LOGIC       "FALSE"         ;# TRUE|FALSE; set to TRUE for TIO to optimize shared logic; requires $ICC_TIO_OPTIMIZE_BLOCK_INTERFACE to be also enabled
+#@ set ICC_TIO_HOST_OPTION_POOL_OPTION 	""		;# lsf|grd; this controls the -pool option for set_host_options for TIO
+#@ set ICC_TIO_HOST_OPTION_SUBMIT_OPTIONS {}		;# controls the value of -submit_option option for set_host_options for TIO. 
+#@ ;# If ICC_TIO_HOST_OPTION_POOL_OPTION is set to lsf, 
+#@ ;# then lsf specific submit options should be specified and vice versa, for example, 
+#@ ;# {-q bnormal -R "rusage\[mem=12000\]\cputype==emt64 cpuspeed==EMT3000 qsc==e"}
+#@ ;# ICC_TIO_HOST_OPTION_POOL_OPTION and ICC_TIO_HOST_OPTION_SUBMIT_OPTIONS are required if
+#@ ;# ICC_TIO_OPTIMIZE_BLOCK_INTERFACE is set to TRUE and ICC_TIO_BLOCK_LIST is not empty.
+#@ 
+#@ set ICC_TIO_WRITE_ECO_FILE              "FALSE"		;# TRUE|FALSE; set to TRUE for TIO to write out an ECO file to TIO_eco_changes directory
+#@ 
+#@ set ICC_IMPLEMENTATION_PHASE		"default"       ;# default|block|top; set it to block or top to disable tasks such as Milkyway design library creation,
+#@ ;# importing of black boxes, scenario creation, voltage area creation, and power switch creation, etc 
+#@ ;# in init_design_icc.tcl which should have been completed during design planning phase and should be skipped during 
+#@ ;# block and top level implementation phases; also set it to top to enable TIO at route_opt_icc task;
+#@ ;# if you are following IC Compiler Hierarchical RM step-by-step, please do not change this;
+#@ ;# it will be automatically set to block or top for block or top level designs, respectively
+#@ 
+#@ set MW_SOFT_MACRO_LIBS                  ""       	;# a list containing paths to all block libraries; they will be added as reference libraries of the top level library
+#@ ;# if you are following IC Compiler Hierarchical RM step-by-step, please do not change this;
+#@ ;# it will be automatically set to include all block libraries in the design for top level implementation
+#@ 
+#@ ###############################################################################
+#@ ## IC Compiler Design Planning Reference Methodology (Flat) Variables
+#@ ###############################################################################
+#@ 
+#@ ## explore mode: flow control variables
+#@ set ICC_DP_EXPLORE_MODE			TRUE		;# TRUE|FALSE; turn on exploration mode
+#@ set ICC_DP_EXPLORE_STYLE		default		;# valid options are: default | placement_only | no_pns_pna | no_ipo
+#@ ;# default: place -> PNS/PNA -> in-place optimization -> final groute, snapshot, QoR, timing, and outputs 
+#@ ;# placement_only: skips pns/pna and in-place optimization from default | no_pns_pna: skips pna/pns from default 
+#@ ;# | no_ipo: skips in-place optimization from default 
+#@ set ICC_DP_EXPLORE_SAVE_CEL_EACH_STEP 	FALSE		;# TRUE|FALSE; save 3 additional CEL after placement, in-place optimization, and PNS in explore mode (requires more disk space)
+#@ set ICC_DP_EXPLORE_REPORTING_EACH_STEP	FALSE		;# TRUE|FALSE; generate QoR snapshot and timing report after each step (longer run time)
+#@ set ICC_DP_EXPLORE_USE_GLOBAL_ROUTE 	FALSE		
+#@ set ICC_DP_EXPLORE_SAVE_CEL_AFTER_GROUTE TRUE		;# TRUE|FALSE; save 2 additional CEL after global route: one after placement and one at the end
+#@ set ICC_DP_EXPLORE_CUSTOM_PG_SCRIPT	""		;# string; script to be loaded to create customized PG straps after placement in explore mode; 
+#@ ;# valid only if ICC_DP_EXPLORE_STYLE is placement_only or no_pns_pna
+#@ 
+#@ ## explore mode: additional PNS control variables
+#@ set PNS_TARGET_VOLTAGE_DROP     	250	        ;# Unit in milliVolts. Tool default is 10% of PNS_POWER_BUDGET
+#@ set PNS_BLOCK_MODE         		FALSE           ;# TRUE|FALSE; specify if the design is block or top level; It turns on correspondant options in PNS and PNA
+#@ set PNS_PAD_MASTERS        		""		;# Only for top level design with power pads. Specify cell masters for power pads, e.g. "pv0i.FRAM pv0a.FRAM"
+#@ set PNS_PAD_INSTANCE_FILE  		""              ;# Only for top level design with power pads. Specify the file with a list of power pad instances
+#@ set PNS_PAD_MASTER_FILE    		""		;# Only for top level design with power pads. Specify the file with a list of power pad masters
+#@ ## Please provide only one of PNS_PAD_MASTERS, OR PNS_PAD_INSTANCE_FILE, OR PNS_PAD_MASTER_FILE 
+#@ 
+#@ #####################################################################################################################################
+#@ ## NO NEED TO CHANGE THE FOLLOWING IF Design Compiler Reference Metholodgy IS USED PRIOR TO IC Compiler Reference Methodology
+#@ #####################################################################################################################################
+#@ set ICC_IN_VERILOG_NETLIST_FILE "$DESIGN_NAME.v" ;#1 to n verilog input files, spaced by blanks
+#@ set ICC_IN_SDC_FILE             "$DESIGN_NAME.sdc"
+#@ set ICC_IN_DDC_FILE             "$DESIGN_NAME.ddc"
+#@ set ICC_IN_UPF_FILE             "$DESIGN_NAME.mapped.upf"
+#@ set ICC_IN_SCAN_DEF_FILE        "" 			;# default from Design Compiler Reference Metholodgy is $DESIGN_NAME.mapped.scandef
+#@ 
+#@ ###################################################################################################################
+#@ if {$upf_create_implicit_supply_sets} {
+#@   # Starting G-2012.06 release, the variable upf_create_implicit_supply_sets enables creation of supply set handles
+#@   # while creating power domains. Default is true.
+#@   # The if clause is added to ensure it's changed only once per session. Refer to man page for details.
+#@   # To change the value to false, please uncomment the following line :
+#@ 
+#@   set_app_var upf_create_implicit_supply_sets false
+#@ }
+#@ ###################################################################################################################
+#@ 
+#@ if {[info exists SEV(rpt_dir)]} {
+#@   set REPORTS_DIR $SEV(rpt_dir)				;# Directory to write reports.
+#@ } else {
+#@   set REPORTS_DIR "../rpts/null"			;# Directory to write reports.
+#@ }
+#@ if {[info exists SEV(dst_dir)]} {
+#@   set RESULTS_DIR $SEV(dst_dir)				;# Directory to write output data files
+#@ } else {
+#@   set RESULTS_DIR "../work/null"				;# Directory to write output data files
+#@ }
+#@ set MW_DESIGN_LIBRARY           "../work/${DESIGN_NAME}_LIB"    ;# milkyway design library
+#@ set COPY_FROM_MW_DESIGN_LIBRARY "../../rm_dc/work/dc/${DESIGN_NAME}_LIB" ;# specify a milkyway design library if you want reference methodology to copy it as MW_DESIGN_LIBRARY
+#@ ;# only applies if ICC_INIT_DESIGN_INPUT is set to Milkyway
+#@ 
+#@ set REPORTS_DIR_INIT_DESIGN                     $REPORTS_DIR
+#@ set REPORTS_DIR_PLACE_OPT                       $REPORTS_DIR
+#@ set REPORTS_DIR_CLOCK_OPT_CTS                   $REPORTS_DIR
+#@ set REPORTS_DIR_CLOCK_OPT_PSYN                  $REPORTS_DIR
+#@ set REPORTS_DIR_CLOCK_OPT_ROUTE                 $REPORTS_DIR
+#@ set REPORTS_DIR_ROUTE                           $REPORTS_DIR
+#@ set REPORTS_DIR_ROUTE_OPT                       $REPORTS_DIR
+#@ set REPORTS_DIR_CHIP_FINISH                     $REPORTS_DIR
+#@ set REPORTS_DIR_ECO                        	$REPORTS_DIR
+#@ set REPORTS_DIR_FOCAL_OPT                       $REPORTS_DIR
+#@ set REPORTS_DIR_SIGNOFF_OPT                     $REPORTS_DIR
+#@ set REPORTS_DIR_METAL_FILL                      $REPORTS_DIR
+#@ set REPORTS_DIR_DP            			$REPORTS_DIR
+#@ set REPORTS_DIR_DP_CREATE_PLANGROUPS		$REPORTS_DIR
+#@ set REPORTS_DIR_DP_ROUTEABILITY_ON_PLANGROUPS   $REPORTS_DIR
+#@ set REPORTS_DIR_DP_PIN_ASSIGNMENT_BUDGETING     $REPORTS_DIR
+#@ set REPORTS_DIR_DP_COMMIT                       $REPORTS_DIR
+#@ set REPORTS_DIR_DP_PREPARE_BLOCK                $REPORTS_DIR
+#@ set REPORTS_DIR_FORMALITY			$REPORTS_DIR
+#@ 
+#@ if { ! [file exists $REPORTS_DIR_INIT_DESIGN] } { file mkdir $REPORTS_DIR_INIT_DESIGN }
+#@ if { ! [file exists $REPORTS_DIR_PLACE_OPT] } { file mkdir $REPORTS_DIR_PLACE_OPT }
+#@ if { ! [file exists $REPORTS_DIR_CLOCK_OPT_CTS] } { file mkdir $REPORTS_DIR_CLOCK_OPT_CTS }
+#@ if { ! [file exists $REPORTS_DIR_CLOCK_OPT_PSYN] } { file mkdir $REPORTS_DIR_CLOCK_OPT_PSYN }
+#@ if { ! [file exists $REPORTS_DIR_CLOCK_OPT_ROUTE] } { file mkdir $REPORTS_DIR_CLOCK_OPT_ROUTE }
+#@ if { ! [file exists $REPORTS_DIR_ROUTE] } { file mkdir $REPORTS_DIR_ROUTE }
+#@ if { ! [file exists $REPORTS_DIR_ROUTE_OPT] } { file mkdir $REPORTS_DIR_ROUTE_OPT }
+#@ if { ! [file exists $REPORTS_DIR_CHIP_FINISH] } { file mkdir $REPORTS_DIR_CHIP_FINISH }
+#@ if { ! [file exists $REPORTS_DIR_ECO] } { file mkdir $REPORTS_DIR_ECO }
+#@ if { ! [file exists $REPORTS_DIR_FOCAL_OPT] } { file mkdir $REPORTS_DIR_FOCAL_OPT }
+#@ if { ! [file exists $REPORTS_DIR_SIGNOFF_OPT] } { file mkdir $REPORTS_DIR_SIGNOFF_OPT }
+#@ if { ! [file exists $REPORTS_DIR_METAL_FILL] } { file mkdir $REPORTS_DIR_METAL_FILL }
+#@ if { ! [file exists $REPORTS_DIR_DP] } { file mkdir $REPORTS_DIR_DP }
+#@ if { ! [file exists $REPORTS_DIR_DP_CREATE_PLANGROUPS] } { file mkdir $REPORTS_DIR_DP_CREATE_PLANGROUPS }
+#@ if { ! [file exists $REPORTS_DIR_DP_ROUTEABILITY_ON_PLANGROUPS] } { file mkdir $REPORTS_DIR_DP_ROUTEABILITY_ON_PLANGROUPS }
+#@ if { ! [file exists $REPORTS_DIR_DP_PIN_ASSIGNMENT_BUDGETING] } { file mkdir $REPORTS_DIR_DP_PIN_ASSIGNMENT_BUDGETING }
+#@ if { ! [file exists $REPORTS_DIR_DP_COMMIT] } { file mkdir $REPORTS_DIR_DP_COMMIT }
+#@ if { ! [file exists $REPORTS_DIR_DP_PREPARE_BLOCK] } { file mkdir $REPORTS_DIR_DP_PREPARE_BLOCK }
+#@ if { ! [file exists $REPORTS_DIR_FORMALITY] } { file mkdir $REPORTS_DIR_FORMALITY }
+#@ 
+#@ 
+#@ ## Logical libraries
+#@ set_app_var search_path	". ../../scripts_block/rm_icc_scripts ../../scripts_block/rm_icc_zrt_scripts ../../scripts_block/rm_icc_dp_scripts ../../rm_dc/work/dc $ADDITIONAL_SEARCH_PATH $search_path" 
+#@ if {$synopsys_program_name != "mvrc"} {
+#@   set_app_var target_library	"$TARGET_LIBRARY_FILES"
+#@   set_app_var link_library	"* $TARGET_LIBRARY_FILES $ADDITIONAL_LINK_LIB_FILES"
+#@ } else {
+#@   set_app_var link_library	"$TARGET_LIBRARY_FILES $ADDITIONAL_LINK_LIB_FILES"
+#@ }
+#@ 
+#@ if { ! [file exists $RESULTS_DIR] } {
+#@   file mkdir $RESULTS_DIR
+#@ }
+#@ if { ! [file exists $REPORTS_DIR] } {
+#@   file mkdir $REPORTS_DIR
+#@ }
+#@ 
+#@ if {$synopsys_program_name == "icc_shell"} {
+#@ 
+#@ ## Min/Max library relationships
+#@ #  For "set_operating_conditions -analysis_type on_chip_variation", it is not recommended if only -max is specified.
+#@ #  (such as in rm_icc_scripts/mcmm.scenarios.example) 
+#@ #  Only use it if both -max and -min of set_operating_conditions are specified and point to two different libraries
+#@ #  and are characterized to model OCV effects of the same corner.
+#@ if {$MIN_LIBRARY_FILES != "" } {
+#@   foreach {max_library min_library} $MIN_LIBRARY_FILES {
+#@     set_min_library $max_library -min_version $min_library
+#@   }
+#@ }
+#@ 
+#@ ## Reference libraries
+#@ if { ![file exists [which $MW_REFERENCE_CONTROL_FILE]]} {
+#@  if {[file exists $MW_DESIGN_LIBRARY/lib]} {
+#@    set_mw_lib_reference $MW_DESIGN_LIBRARY -mw_reference_library "$MW_REFERENCE_LIB_DIRS $MW_SOFT_MACRO_LIBS"
+#@  }
+#@ }
+#@ 
+#@ ## PD4 is not always used
+#@ if {![info exists PD4]} {set PD4 ""}
+#@ 
+#@ ## Avoiding too many messages
+#@ set_message_info -id PSYN-040 -limit 10 ;# Dont_touch for fixed cells
+#@ set_message_info -id PSYN-087 -limit 10 ;# Port inherits its location from pad pin
+#@ set_message_info -id LINT-8   -limit 10 ;# input port is unloaded
+#@ 
+#@ set_app_var check_error_list "$check_error_list LINK-5 PSYN-375"
+#@ 
+#@ }
+#@ 
+#@ if {$synopsys_program_name == "fm_shell"} {
+#@ set_app_var sh_new_variable_message false
+#@ } 
+#@ #################################################################################
+#@ 
+#@ source ../rm_setup/procs.tcl
+#@ # -- Starting source ../rm_setup/procs.tcl
+
+#@ # Synopsys Customer Education Services
+#@ # IC Compiler Workshop series
+#@ #
+#@ # Tcl procedures to simplify life...
+#@ 
+#@ puts "\#\#\# Processing procs.tcl..."
+#@ 
+#@ create_command_group CES_procs
+#@ set TOOLS_VIEW_PATH "../../../ref/tools"
+#@ 
+#@ # Get command results/reports in separate graphical tk window
+#@ # This expects view.tk to be in the path, which is the other half
+#@ # of this procedure!
+#@ # Examples: view man compile,  view report_timing -max_paths 20
+#@ #======================================================
+#@ #Compatibility with VCS/DVE:
+#@ if {[info exists uclidir]} {
+#@         set view_proc_name tview
+#@         alias v tview
+#@ } else {
+#@         set view_proc_name view
+#@         alias v view
+#@ }
+#@ proc $view_proc_name {args} {
+#@         global TOOLS_VIEW_PATH
+#@         set VIEW_COMMAND $TOOLS_VIEW_PATH/view.tk
+#@         if {$args == ""} {
+#@                 puts "Please provide a command."
+#@                 return
+#@         }
+#@ 
+#@         if { [catch {open "| $VIEW_COMMAND \"$args\"" w} PIPE] } {
+#@                 return "Can't open pipe for '$VIEW_COMMAND'"
+#@         }
+#@         redirect -channel $PIPE {uplevel $args}
+#@         flush $PIPE
+#@ }
+#@ if {$view_proc_name == "view"} {
+#@         define_proc_attributes $view_proc_name \
+#@         -info "Display output of any command in a separate Tk window." \
+#@         -command_group CES_procs \
+#@         -define_args { {args "Command with arguments" args} }
+#@ }
+#@ 
+#@ proc qor {name} {
+#@         file mkdir reports
+#@         create_qor_snapshot -name $name
+#@         redirect -file reports/$name.qor_snapshot.rpt {report_qor_snapshot -no_display}
+#@ }
+#@ 
+#@ # Generates statistics on the current session:
+#@ # Rev 1.0
+#@ # amins@synopsys.com
+#@ proc host_stats {} {
+#@         redirect -variable cated {exec cat /proc/cpuinfo}
+#@         set cated [split $cated "\n"]
+#@         foreach l $cated {
+#@                 regexp {^model name\s*\:\s+(.+)$} $l m cpu_model
+#@                 regexp {^cpu MHz\s*\:\s+(.+)$} $l m cpu_mhz
+#@                 regexp {^cache size\s*\:\s+(\d+)} $l m cache_size
+#@                 regexp {^processor\s*\:\s+(\d+)} $l m num_cores
+#@         }
+#@         incr num_cores
+#@ 
+#@         redirect -variable cated {exec cat /proc/meminfo}
+#@         set cated [split $cated "\n"]
+#@         foreach l $cated {
+#@                 regexp {^MemTotal\s*\:\s+(\d+)} $l m mem_total
+#@                 regexp {^MemFree\s*\:\s+(\d+)} $l m mem_free
+#@         }
+#@         set mem_total [format

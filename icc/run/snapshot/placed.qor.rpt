@@ -1,0 +1,88 @@
+Information: Updating graph... (UID-83)
+Information: Updating design information... (UID-85)
+ 
+****************************************
+Report : qor
+Design : control_pad
+Version: T-2022.03
+Date   : Fri Nov 28 20:06:26 2025
+****************************************
+
+
+  Timing Path Group 'clk'
+  -----------------------------------
+  Levels of Logic:              5.000
+  Critical Path Length:        10.293
+  Critical Path Slack:          8.407
+  Critical Path Clk Period:    20.000
+  Total Negative Slack:         0.000
+  No. of Violating Paths:       0.000
+  Worst Hold Violation:         0.000
+  Total Hold Violation:         0.000
+  No. of Hold Violations:       0.000
+  -----------------------------------
+
+
+  Cell Count
+  -----------------------------------
+  Hierarchical Cell Count:          0
+  Hierarchical Port Count:          0
+  Leaf Cell Count:                 42
+  Buf/Inv Cell Count:               3
+  Buf Cell Count:                   0
+  Inv Cell Count:                   3
+  CT Buf/Inv Cell Count:            0
+  Combinational Cell Count:        39
+  Sequential Cell Count:            3
+  Macro Count:                      0
+  -----------------------------------
+
+
+  Area
+  -----------------------------------
+  Combinational Area:      103623.596
+  Noncombinational Area:       96.752
+  Buf/Inv Area:            103436.882
+  Total Buffer Area:            0.000
+  Total Inverter Area:         11.882
+  Macro/Black Box Area:         0.000
+  Net Area:                     0.000
+  Net XLength        :       5076.314
+  Net YLength        :       7075.173
+  -----------------------------------
+  Cell Area:               103720.348
+  Design Area:             103720.348
+  Net Length        :       12151.486
+
+
+  Design Rules
+  -----------------------------------
+  Total Number of Nets:            51
+  Nets With Violations:             5
+  Max Trans Violations:             5
+  Max Cap Violations:               5
+  -----------------------------------
+
+
+  Hostname: eda
+
+  Compile CPU Statistics
+  -----------------------------------------
+  Resource Sharing:                   0.000
+  Logic Optimization:                 0.000
+  Mapping Optimization:               2.046
+  -----------------------------------------
+  Overall Compile Time:               2.111
+  Overall Compile Wall Clock Time:    2.196
+
+  --------------------------------------------------------------------
+
+  Design  WNS: 0.000  TNS: 0.000  Number of Violating Paths: 0
+
+
+  Design (Hold)  WNS: 0.000  TNS: 0.000  Number of Violating Paths: 0
+
+  --------------------------------------------------------------------
+
+
+1

@@ -1,0 +1,104 @@
+ 
+****************************************
+Report : design
+        -physical
+Design : control_pad
+Version: T-2022.03
+Date   : Fri Nov 28 20:06:26 2025
+****************************************
+
+****************************** P&R Summary ********************************
+Date : Fri Nov 28 20:06:26 2025
+Machine Host Name: eda
+Working Directory: /home/user123/Desktop/ASIC/icc/run
+Library Name:      control_pad.mw
+Cell Name:         place.CEL;1
+Design Statistics:
+    Number of Module Cells:        27
+    Number of Pins:                185
+    Number of IO Pad Cells:        23
+    Number of IO Pins:             15
+    Number of Nets:                53
+    Average Pins Per Net (Signal): 2.78431
+
+Chip Utilization:
+    Total Std Cell Area:           295.35
+    Total Pad Cell Area:           313821.00
+    Core Size:     width 150.42, height 147.60; area 22201.99
+    Pad Core Size: width 210.42, height 210.00; area 44188.20
+    Chip Size:     width 604.42, height 604.00; area 365069.68
+    Std cells utilization:         1.33% 
+    Cell/Core Ratio:               1.33%
+    Cell/Chip Ratio:               86.04%
+    Number of Cell Rows:            40
+
+Master Instantiation:
+	MasterName	Type	InstCount
+	=================================
+	NOR2XL		STD	5
+	NOR2X2		STD	3
+	OAI211X4	STD	2
+	NOR3BX2		STD	2
+	DFFRXL		STD	2
+	INVXL		STD	2
+	NAND3XL		STD	2
+	NAND2BX1	STD	1
+	DFFRX1		STD	1
+	INVX3		STD	1
+	NOR3X4		STD	1
+	OAI21XL		STD	1
+	AND2XL		STD	1
+	NAND4XL		STD	1
+	AOI2BB1XL	STD	1
+	NAND2BXL	STD	1
+	PFILL001	IO	3580
+	PO8		IO	9
+	PI		IO	6
+	PVDD2		IO	2
+	PVSS2		IO	2
+	PVDD1		IO	2
+	PVSS1		IO	2
+	PCORNER		CORNER	4
+	=================================
+
+Timing/Optimization Information:
+
+Global Routing Information:
+
+Track Assignment Information:
+
+Detailed Routing Information:
+
+DRC information: 
+      Total error number: 0
+
+Ring Wiring Statistics:
+    metal7 Wire Length(count):                650.40(4)
+    metal8 Wire Length(count):                661.68(4)
+  ==============================================
+    Total Wire Length(count):                1312.08(8)
+    Number of via7 Contacts:              8
+  ==============================================
+    Total Number of Contacts:        8
+
+Stripe Wiring Statistics:
+    metal7 Wire Length(count):                981.60(6)
+    metal8 Wire Length(count):                998.52(6)
+  ==============================================
+    Total Wire Length(count):                1980.12(12)
+    Number of via7 Contacts:             42
+  ==============================================
+    Total Number of Contacts:       42
+
+User Wiring Statistics:
+
+PG follow-pin Wiring Statistics:
+
+Signal Wiring Statistics:
+      Mask Name      Contact Code    Number Of Contacts    Percentage
+
+  Horizontal/Vertical Wire Distribution:
+    Layer      Hor. Wire (% of Hor.)     Ver. Wire (% of Ver.)
+  ==============================================================
+    Total              0.00                      0.00
+1

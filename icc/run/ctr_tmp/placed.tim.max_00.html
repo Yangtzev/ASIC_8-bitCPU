@@ -1,0 +1,137 @@
+<HTML><TITLE>Partial placed.tim.max report</TITLE></HTML><BODY>
+<script type="text/javascript">
+//helper routine for onload
+function getQueryVariable(variable) {
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+  for (var i=0;i<vars.length;i++) {
+    var pair = vars[i].split("=");
+    if (pair[0] == variable) {
+      return pair[1];
+    }
+  }
+}
+// Dean Edwards/Matthias Miller/John Resig
+
+function init() {
+  // quit if this function has already been called
+  if (arguments.callee.done) return;
+
+  // flag this function so we don't do the same thing twice
+  arguments.callee.done = true;
+
+  // kill the timer
+  if (_timer) clearInterval(_timer);
+
+  // do stuff
+  var l=getQueryVariable("r");
+    if( l == undefined ) return;
+    var base = document.getElementById("L"+l);
+    if( base == undefined ) return;
+    base.style.background="yellow";
+};
+
+/* for Mozilla/Opera9 */ 
+if (document.addEventListener) {
+  document.addEventListener("DOMContentLoaded", init, false);
+}
+
+/* for Internet Explorer */ 
+/*@cc_on @*/ 
+/*@if (@_win32 || @_win64)
+  document.write("<script id=__ie_onload defer src=javascript:void(0)><\/script>");
+  var script = document.getElementById("__ie_onload");
+  script.onreadystatechange = function() {
+    if (this.readyState == "complete") {
+      init(); // call the onload handler
+    }
+  };
+/*@end @*/ 
+
+/* for Safari */ 
+if (/WebKit/i.test(navigator.userAgent)) { // sniff
+  var _timer = setInterval(function() {
+    if (/loaded|complete/.test(document.readyState)) {
+      init(); // call the onload handler
+    }
+  }, 10);
+}
+
+/* for other browsers */
+window.onload = init;
+
+</script>
+<BODY>
+<pre><a name=L1 id=L1>Line 1:  </a>
+<a name=L2 id=L2>Line 2: ****************************************</a>
+<a name=L3 id=L3>Line 3: Report : timing</a>
+<a name=L4 id=L4>Line 4:         -path full_clock</a>
+<a name=L5 id=L5>Line 5:         -delay max</a>
+<a name=L6 id=L6>Line 6:         -physical</a>
+<a name=L7 id=L7>Line 7:         -derate</a>
+<a name=L8 id=L8>Line 8:         -input_pins</a>
+<a name=L9 id=L9>Line 9:         -nets</a>
+<a name=L10 id=L10>Line 10:         -max_paths 1</a>
+<a name=L11 id=L11>Line 11:         -transition_time</a>
+<a name=L12 id=L12>Line 12:         -crosstalk_delta</a>
+<a name=L13 id=L13>Line 13:         -capacitance</a>
+<a name=L14 id=L14>Line 14: Design : control_pad</a>
+<a name=L15 id=L15>Line 15: Version: T-2022.03</a>
+<a name=L16 id=L16>Line 16: Date   : Fri Nov 28 20:06:27 2025</a>
+<a name=L17 id=L17>Line 17: ****************************************</a>
+<a name=L18 id=L18>Line 18: </a>
+<a name=L19 id=L19>Line 19:  * Some/all delay information is back-annotated.</a>
+<a name=L20 id=L20>Line 20: </a>
+<a name=L21 id=L21>Line 21: Operating Conditions: typical_1v2c25   Library: typical_1v2c25</a>
+<a name=L22 id=L22>Line 22: </a>
+<a name=L23 id=L23>Line 23:   Startpoint: opcode[1] (input port clocked by clk)</a>
+<a name=L24 id=L24>Line 24:   Endpoint: ld_ac (output port clocked by clk)</a>
+<a name=L25 id=L25>Line 25:   Path Group: clk</a>
+<a name=L26 id=L26>Line 26:   Path Type: max</a>
+<a name=L27 id=L27>Line 27: </a>
+<a name=L28 id=L28>Line 28: Attributes:</a>
+<a name=L29 id=L29>Line 29:     d - dont_touch</a>
+<a name=L30 id=L30>Line 30:     u - dont_use</a>
+<a name=L31 id=L31>Line 31:    mo - map_only</a>
+<a name=L32 id=L32>Line 32:    so - size_only</a>
+<a name=L33 id=L33>Line 33:     i - ideal_net or ideal_network</a>
+<a name=L34 id=L34>Line 34: </a>
+<a name=L35 id=L35>Line 35:   Point                        Fanout       Cap     DTran     Trans     Delta     Derate      Incr       Path      Location / Load        Attributes</a>
+<a name=L36 id=L36>Line 36:   --------------------------------------------------------------------------------------------------------------------------------------------------</a>
+<a name=L37 id=L37>Line 37:   clock clk (rise edge)                                                                      0.000      0.000</a>
+<a name=L38 id=L38>Line 38:   clock network delay (ideal)                                                                0.000      0.000</a>
+<a name=L39 id=L39>Line 39:   input external delay                                                                       0.100      0.100 r</a>
+<a name=L40 id=L40>Line 40:   opcode[1] (in)                                             14.766                          7.882      7.982 r    (283.65,603.56)</a>
+<a name=L41 id=L41>Line 41:   opcode[1] (net)                1        6.780                                              0.000      7.982 r    [0.07,6.78]</a>
+<a name=L42 id=L42>Line 42:   i_opcode_1/PAD (PI)                               0.000    18.457     0.000                0.327 *    8.309 r    (-5.45,389.50)         d u </a>
+<a name=L43 id=L43>Line 43:   i_opcode_1/C (PI)                                           0.000                          0.163      8.472 r    (196.69,382.63)        d u </a>
+<a name=L44 id=L44>Line 44:   opcode_pad[1] (net)            3        0.018                                              0.000      8.472 r    [0.01,0.02]</a>
+<a name=L45 id=L45>Line 45:   U13/B (NOR2XL)                                    0.000     0.000     0.000                0.000 *    8.472 r    (234.15,361.59)</a>
+<a name=L46 id=L46>Line 46:   U13/Y (NOR2XL)                                              0.211                          0.128      8.601 f    (234.89,361.65)</a>
+<a name=L47 id=L47>Line 47:   n12 (net)                      3        0.024                                              0.000      8.601 f    [0.02,0.02]</a>
+<a name=L48 id=L48>Line 48:   U14/B (NOR2XL)                                    0.000     0.211     0.000                0.000 *    8.601 f    (270.95,354.21)</a>
+<a name=L49 id=L49>Line 49:   U14/Y (NOR2XL)                                              0.612                          0.400      9.001 r    (271.69,354.27)</a>
+<a name=L50 id=L50>Line 50:   n15 (net)                      3        0.022                                              0.000      9.001 r    [0.01,0.02]</a>
+<a name=L51 id=L51>Line 51:   U26/AN (NOR3BX2)                                  0.000     0.612     0.000                0.000 *    9.001 r    (297.64,358.10)</a>
+<a name=L52 id=L52>Line 52:   U26/Y (NOR3BX2)                                             0.785                          0.518      9.519 r    (299.98,358.19)</a>
+<a name=L53 id=L53>Line 53:   ld_ac_pad (net)                1        0.094                                              0.000      9.519 r    [0.02,0.09]</a>
+<a name=L54 id=L54>Line 54:   i_ld_ac/I (PO8)                                   0.000     0.981     0.000                0.001 *    9.520 r    (407.73,384.92)        d u </a>
+<a name=L55 id=L55>Line 55:   i_ld_ac/PAD (PO8)                                           0.625                          0.871     10.391 r    (609.87,389.50)        d u </a>
+<a name=L56 id=L56>Line 56:   ld_ac (net)                    1        0.133                                              0.000     10.391 r    [0.07,0.13]</a>
+<a name=L57 id=L57>Line 57:   ld_ac (out)                                       0.000     0.500     0.000                0.002 *   10.393 r    (320.05,603.80)</a>
+<a name=L58 id=L58>Line 58:   data arrival time                                                                                    10.393</a>
+<a name=L59 id=L59>Line 59: </a>
+<a name=L60 id=L60>Line 60:   clock clk (rise edge)                                                                     20.000     20.000</a>
+<a name=L61 id=L61>Line 61:   clock network delay (ideal)                                                                0.000     20.000</a>
+<a name=L62 id=L62>Line 62:   clock uncertainty                                                                         -0.200     19.800</a>
+<a name=L63 id=L63>Line 63:   output external delay                                                                     -1.000     18.800</a>
+<a name=L64 id=L64>Line 64:   data required time                                                                                   18.800</a>
+<a name=L65 id=L65>Line 65:   --------------------------------------------------------------------------------------------------------------------------------------------------</a>
+<a name=L66 id=L66>Line 66:   data required time                                                                                   18.800</a>
+<a name=L67 id=L67>Line 67:   data arrival time                                                                                   -10.393</a>
+<a name=L68 id=L68>Line 68:   --------------------------------------------------------------------------------------------------------------------------------------------------</a>
+<a name=L69 id=L69>Line 69:   slack (MET)                                                                                           8.407</a>
+<a name=L70 id=L70>Line 70: </a>
+<a name=L71 id=L71>Line 71: </a>
+<a name=L72 id=L72>Line 72: 1</a>
+</pre></BODY></HTML>
